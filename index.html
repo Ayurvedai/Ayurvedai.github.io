@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,13 +10,6 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f7fafc; /* Slightly softer gray */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh; /* Make body take full viewport height */
-            margin: 0; /* Remove default body margin */
-            padding: 2rem; /* Add some padding around the main container */
         }
         .chat-bubble-user {
             background-color: #4299e1; /* Tailwind's blue-500 */
@@ -69,8 +61,6 @@
             font-size: 14px;
             color: white;
             font-weight: 500;
-            /* Simple initials or icon can go here if desired */
-            /* For simplicity, keeping it a plain circle */
             opacity: 0;
             animation: messageAppear 0.4s ease-out forwards 0.1s; /* Delayed appearance */
         }
@@ -155,31 +145,13 @@
             transform: scale(1.03); /* Slight scale on hover */
         }
 
-        /* Main container to control max width in fullscreen */
-        .main-container {
-            width: 100%;
-            max-width: 90vw; /* Adjust as needed for desired maximum width */
-            height: 90vh; /* Adjust as needed for desired maximum height */
-            background-color: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border-radius: 0.75rem;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        @media (min-width: 640px) { /* Medium screens and up */
-            .main-container {
-                max-width: 2xl; /* Use Tailwind's max-width utility */
-                height: 85vh; /* Adjust height for larger screens */
-            }
-        }
     </style>
 </head>
-<body>
-    <div class="main-container">
+<body class="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
+
+    <div class="w-full md:max-w-4xl lg:max-w-5xl xl:max-w-6xl bg-white shadow-2xl rounded-xl flex flex-col h-[90vh] overflow-hidden">
         <header class="bg-gradient-to-r from-emerald-500 to-green-500 text-white p-5 rounded-t-xl shadow-md">
-            <h1 class="text-xl font-semibold text-center">Ayurvedic & Modern Health Assistant</h1>
+            <h1 class="text-xl lg:text-2xl font-semibold text-center">Ayurvedic & Modern Health Assistant</h1>
         </header>
 
         <div id="chat-container" class="flex-1 p-6 space-y-1 overflow-y-auto">
@@ -193,8 +165,8 @@
 
         <div class="p-4 border-t border-gray-200 bg-gray-50">
             <div class="flex items-center space-x-3">
-                <input type="text" id="user-input" placeholder="Ask about health & Ayurveda..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition duration-150 text-sm">
-                <button id="send-button" class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-5 rounded-lg transition duration-150 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-opacity-75 text-sm">
+                <input type="text" id="user-input" placeholder="Ask about health & Ayurveda..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition duration-150 text-sm md:text-base">
+                <button id="send-button" class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-5 rounded-lg transition duration-150 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-opacity-75 text-sm md:text-base">
                     Send
                 </button>
             </div>
@@ -248,7 +220,7 @@
 
             containerDiv.appendChild(avatarDiv);
             containerDiv.appendChild(bubbleDiv);
-
+            
             typingIndicatorElement = containerDiv; // Store the whole container
             chatContainer.appendChild(typingIndicatorElement);
             chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -278,7 +250,7 @@
             messageDiv.classList.add('chat-bubble');
             if (sender === 'user') {
                 messageDiv.classList.add('chat-bubble-user', 'self-end');
-                // messageContainer will handle alignment so self-end on bubble itself not strictly needed
+               // messageContainer will handle alignment so self-end on bubble itself not strictly needed
             } else {
                 messageDiv.classList.add('chat-bubble-bot', 'self-start');
             }
@@ -308,7 +280,7 @@
                 console.error("Error calling Gemini API:", error);
                 removeTypingIndicator(); // Ensure typing is removed on error
                 appendMessage("Sorry, an error occurred. Please check the console or try again.", 'bot'); // Show error in chat
-
+                
                 if (error.message.includes("API key not valid")) {
                     showMessageBox("It seems the API key is not valid. Please check your API key and try again.");
                 } else if (error.message.includes("API key not set")) {
@@ -347,4 +319,75 @@ When a user inquires about a health concern or asks for suggestions:
 6.  **Scope**: If the query is outside the scope of Ayurveda, general wellness, or ethical boundaries, politely state that.
 7.  **Tone**: Maintain a helpful and knowledgeable tone suitable for testing.
 
-This is for a testing project. The goal is to demonstrate blended responses, including mentioning herbs with minimal, concise cautions
+This is for a testing project. The goal is to demonstrate blended responses, including mentioning herbs with minimal, concise cautions suitable for this test phase.`;
+
+            const requestBody = {
+                contents: [{
+                    parts: [{
+                        text: systemInstruction + "\n\nUser query: " + userQuery
+                    }]
+                }],
+                "generationConfig": {
+                    "temperature": 0.6,
+                    "maxOutputTokens": 1500,
+                    "topP": 0.9,
+                    "topK": 40
+                }
+            };
+
+            // Simulate API delay for testing typing indicator
+            // await new Promise(resolve => setTimeout(resolve, 2000)); 
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error('Gemini API Error Response:', errorData);
+                    let errorMessage = `API Error: ${response.status} ${response.statusText}.`;
+                    if (errorData.error && errorData.error.message) {
+                        errorMessage += ` Details: ${errorData.error.message}`;
+                         if (errorData.error.message.includes("API key not valid")) {
+                                throw new Error("API key not valid. Please pass a valid API key.");
+                        } else if (errorData.error.message.includes("User location is not supported")) {
+                            throw new Error("API Error: User location is not supported for this model or API key. Details: " + errorData.error.message);
+                        }
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                const data = await response.json();
+
+                if (data.candidates && data.candidates.length > 0 &&
+                    data.candidates[0].content && data.candidates[0].content.parts &&
+                    data.candidates[0].content.parts.length > 0 &&
+                    data.candidates[0].content.parts[0].text) {
+                    return data.candidates[0].content.parts[0].text;
+                } else if (data.promptFeedback && data.promptFeedback.blockReason) {
+                    console.warn('Gemini API response blocked:', data.promptFeedback);
+                    let blockMessage = `Request blocked. Reason: ${data.promptFeedback.blockReason}.`;
+                    if (data.promptFeedback.safetyRatings && data.promptFeedback.safetyRatings.length > 0) {
+                        blockMessage += ` Categories: ${data.promptFeedback.safetyRatings.map(r => r.category).join(', ')}.`;
+                    }
+                    return blockMessage;
+                } else if (data.candidates && data.candidates.length > 0 && data.candidates[0].finishReason === "SAFETY") {
+                    console.warn('Gemini API response blocked due to safety settings:', data.candidates[0].safetyRatings);
+                     return "Response blocked due to safety guidelines. Please try rephrasing.";
+                } else {
+                    console.error('Unexpected Gemini API response structure:', data);
+                    return "Unexpected response from assistant.";
+                }
+
+            } catch (error) {
+                console.error('Error in callGeminiAPI:', error);
+                throw error;
+            }
+        }
+        userInput.focus();
+    </script>
+</body>
+</html>

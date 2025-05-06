@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayurvedic & Modern Health Assistant (Enhanced)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fafc; /* Slightly softer gray */
+        }
+        .chat-bubble-user {
+            background-color: #4299e1; /* Tailwind's blue-500 */
+            color: white;
+        }
+        .chat-bubble-bot {
+            background-color: #48bb78; /* Tailwind's green-500 */
+            color: white;
+        }
+        .chat-bubble {
+            padding: 0.75rem 1.25rem; /* Slightly more padding */
+            border-radius: 1rem; /* More rounded */
+            margin-bottom: 0.75rem; /* Increased margin */
+            max-width: 75%; /* Adjusted max-width */
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: messageAppear 0.4s ease-out forwards;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Softer shadow */
+        }
+
+        .chat-message-container {
+            display: flex;
+            align-items: flex-end; /* Align avatar with bottom of bubble */
+            margin-bottom: 0.75rem;
+        }
+
+        .chat-message-container.user {
+            justify-content: flex-end;
+        }
+
+        .chat-message-container.bot .chat-bubble {
+            margin-left: 0.5rem; /* Space between avatar and bubble */
+        }
+         .chat-message-container.user .chat-bubble {
+            margin-right: 0rem; /* No avatar for user, so no margin needed */
+        }
+
+
+        .bot-avatar {
+            width: 32px;
+            height: 32px;
+            background-color: #a0aec0; /* Tailwind's gray-500 */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: white;
+            font-weight: 500;
+            /* Simple initials or icon can go here if desired */
+            /* For simplicity, keeping it a plain circle */
+            opacity: 0;
+            animation: messageAppear 0.4s ease-out forwards 0.1s; /* Delayed appearance */
+        }
+
+
+        @keyframes messageAppear {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #chat-container::-webkit-scrollbar {
+            width: 6px; /* Slimmer scrollbar */
+        }
+        #chat-container::-webkit-scrollbar-thumb {
+            background-color: #a0aec0; /* Tailwind's gray-500 */
+            border-radius: 3px;
+        }
+        #chat-container::-webkit-scrollbar-track {
+            background-color: #edf2f7; /* Tailwind's gray-200 */
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.25rem;
+        }
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            margin: 0 2px;
+            background-color: #a0aec0; /* Muted color for dots */
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: typing 1.2s infinite ease-in-out;
+        }
+        .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Message Box Styling */
+        .message-box-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); display: flex;
+            justify-content: center; align-items: center; z-index: 1000;
+            opacity: 0; animation: fadeIn 0.3s forwards;
+        }
+        .message-box-content {
+            background-color: white; padding: 2.5rem; border-radius: 0.75rem; /* Slightly larger radius */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); text-align: center;
+            max-width: 90%; width: 420px; transform: scale(0.95);
+            animation: zoomIn 0.3s forwards ease-out;
+        }
+        .message-box-button {
+            background-color: #4299e1; color: white; padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem; border: none; cursor: pointer;
+            margin-top: 1.5rem; font-weight: 500; transition: background-color 0.2s;
+        }
+        .message-box-button:hover { background-color: #3182ce; }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes zoomIn { to { transform: scale(1); opacity: 1; } }
+
+        /* Input Area */
+        #user-input {
+            border-radius: 0.75rem; /* More rounded */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        #send-button {
+            border-radius: 0.75rem;
+            transition: background-color 0.2s, transform 0.15s ease-out;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.07);
+        }
+        #send-button:hover {
+            transform: scale(1.03); /* Slight scale on hover */
+        }
+
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
+
+    <div class="w-full max-w-2xl bg-white shadow-2xl rounded-xl flex flex-col h-[85vh] md:h-[75vh] overflow-hidden">
+        <header class="bg-gradient-to-r from-emerald-500 to-green-500 text-white p-5 rounded-t-xl shadow-md">
+            <h1 class="text-xl font-semibold text-center">Ayurvedic & Modern Health Assistant</h1>
+            </header>
+
+        <div id="chat-container" class="flex-1 p-6 space-y-1 overflow-y-auto">
+            <div class="chat-message-container bot">
+                <div class="bot-avatar">A</div>
+                <div class="chat-bubble chat-bubble-bot">
+                    Namaste! I'm your Ayurvedic & Modern Health Assistant for testing. I can share insights from Ayurveda and general science. How can I assist you today?
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-gray-200 bg-gray-50">
+            <div class="flex items-center space-x-3">
+                <input type="text" id="user-input" placeholder="Ask about health & Ayurveda..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition duration-150 text-sm">
+                <button id="send-button" class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-5 rounded-lg transition duration-150 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-opacity-75 text-sm">
+                    Send
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="message-box-overlay" class="message-box-overlay hidden">
+        <div class="message-box-content">
+            <p id="message-box-text" class="text-gray-700 text-base"></p>
+            <button id="message-box-button" class="message-box-button">OK</button>
+        </div>
+    </div>
+
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const messageBoxOverlay = document.getElementById('message-box-overlay');
+        const messageBoxText = document.getElementById('message-box-text');
+        const messageBoxButton = document.getElementById('message-box-button');
+
+        function showMessageBox(message) {
+            messageBoxText.textContent = message;
+            messageBoxOverlay.classList.remove('hidden');
+        }
+
+        messageBoxButton.addEventListener('click', () => {
+            messageBoxOverlay.classList.add('hidden');
+        });
+
+        sendButton.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') sendMessage();
+        });
+
+        let typingIndicatorElement = null;
+
+        function showTypingIndicator() {
+            if (typingIndicatorElement) return; // Already showing
+
+            const containerDiv = document.createElement('div');
+            containerDiv.classList.add('chat-message-container', 'bot');
+
+            const avatarDiv = document.createElement('div');
+            avatarDiv.classList.add('bot-avatar');
+            avatarDiv.textContent = 'A'; // Simple avatar content
+
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.classList.add('chat-bubble', 'chat-bubble-bot', 'typing-indicator');
+            bubbleDiv.innerHTML = '<span></span><span></span><span></span>'; // Dots for typing
+
+            containerDiv.appendChild(avatarDiv);
+            containerDiv.appendChild(bubbleDiv);
+            
+            typingIndicatorElement = containerDiv; // Store the whole container
+            chatContainer.appendChild(typingIndicatorElement);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            if (typingIndicatorElement) {
+                typingIndicatorElement.remove();
+                typingIndicatorElement = null;
+            }
+        }
+
+        function appendMessage(text, sender) {
+            removeTypingIndicator(); // Remove typing indicator if it exists
+
+            const messageContainer = document.createElement('div');
+            messageContainer.classList.add('chat-message-container', sender);
+
+            if (sender === 'bot') {
+                const avatarDiv = document.createElement('div');
+                avatarDiv.classList.add('bot-avatar');
+                avatarDiv.textContent = 'A'; // Or any other initial/icon
+                messageContainer.appendChild(avatarDiv);
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-bubble');
+            if (sender === 'user') {
+                messageDiv.classList.add('chat-bubble-user', 'self-end');
+                 // messageContainer will handle alignment so self-end on bubble itself not strictly needed
+            } else {
+                messageDiv.classList.add('chat-bubble-bot', 'self-start');
+            }
+            messageDiv.textContent = text;
+            messageContainer.appendChild(messageDiv);
+
+            chatContainer.appendChild(messageContainer);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return messageDiv; // Return the bubble itself if needed for other ops
+        }
+
+        async function sendMessage() {
+            const query = userInput.value.trim();
+            if (query === '') {
+                showMessageBox("Please type a message before sending.");
+                return;
+            }
+
+            appendMessage(query, 'user');
+            userInput.value = '';
+            showTypingIndicator();
+
+            try {
+                const botResponse = await callGeminiAPI(query);
+                appendMessage(botResponse, 'bot');
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                removeTypingIndicator(); // Ensure typing is removed on error
+                appendMessage("Sorry, an error occurred. Please check the console or try again.", 'bot'); // Show error in chat
+                
+                if (error.message.includes("API key not valid")) {
+                    showMessageBox("It seems the API key is not valid. Please check your API key and try again.");
+                } else if (error.message.includes("API key not set")) {
+                    showMessageBox("API key is not set in the code. Please add your Gemini API key.");
+                } else if (error.message.includes("models/") && error.message.includes("is not found")) {
+                    showMessageBox("The specified AI model was not found or is not supported with your API key. Details: " + error.message);
+                } else {
+                    // showMessageBox("An error occurred while fetching the response: " + error.message); // Already shown in chat
+                }
+            }
+        }
+
+        async function callGeminiAPI(userQuery) {
+            const API_KEY = 'AIzaSyDmUj1JO8_c66S4mlT9lc6MEF_S63FUTxE'; // YOUR API KEY - Keep secure
+
+            if (API_KEY === '' || API_KEY === 'YOUR_API_KEY') {
+                throw new Error("API key not set. Please replace 'YOUR_API_KEY' in the script.");
+            }
+
+            const MODEL_NAME = 'gemini-1.5-pro-latest';
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+
+            const systemInstruction = `You are an Ayurvedic and Modern Science Health Assistant for a testing environment.
+Your responses should be informative, blending insights from traditional Ayurveda and contemporary scientific understanding.
+
+When a user inquires about a health concern or asks for suggestions:
+1.  **Acknowledge and Initial Ayurvedic View**: Start by acknowledging the query and offering an initial Ayurvedic perspective.
+2.  **Modern Science Integration**: Follow up by integrating relevant modern scientific viewpoints.
+3.  **Considered Recommendation (Simulated Double-Check)**: Use a phrase like: "Considering both traditions..." or "Available information suggests..."
+4.  **Herb/General Wellness Suggestions**:
+    * If appropriate, you MAY suggest generally known Ayurvedic herbs or lifestyle practices.
+    * When mentioning herbs: Briefly note their traditional use (e.g., "Ashwagandha is traditionally used for...").
+    * Add a concise caution if an herb is mentioned: "As this is for informational purposes, please consult a healthcare professional before using any herb, as individual suitability and safety vary."
+    * Do NOT give specific dosages or direct treatment protocols. Focus on general informational properties.
+5.  **Simplified Concluding Disclaimer**: ALWAYS conclude EVERY response with a brief disclaimer: "Note: This information is for educational testing purposes and is not medical advice. Consult a qualified healthcare provider for health concerns."
+6.  **Scope**: If the query is outside the scope of Ayurveda, general wellness, or ethical boundaries, politely state that.
+7.  **Tone**: Maintain a helpful and knowledgeable tone suitable for testing.
+
+This is for a testing project. The goal is to demonstrate blended responses, including mentioning herbs with minimal, concise cautions suitable for this test phase.`;
+
+            const requestBody = {
+                contents: [{
+                    parts: [{
+                        text: systemInstruction + "\n\nUser query: " + userQuery
+                    }]
+                }],
+                "generationConfig": {
+                    "temperature": 0.6,
+                    "maxOutputTokens": 1500,
+                    "topP": 0.9,
+                    "topK": 40
+                }
+            };
+
+            // Simulate API delay for testing typing indicator
+            // await new Promise(resolve => setTimeout(resolve, 2000)); 
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error('Gemini API Error Response:', errorData);
+                    let errorMessage = `API Error: ${response.status} ${response.statusText}.`;
+                    if (errorData.error && errorData.error.message) {
+                        errorMessage += ` Details: ${errorData.error.message}`;
+                         if (errorData.error.message.includes("API key not valid")) {
+                                throw new Error("API key not valid. Please pass a valid API key.");
+                        } else if (errorData.error.message.includes("User location is not supported")) {
+                            throw new Error("API Error: User location is not supported for this model or API key. Details: " + errorData.error.message);
+                        }
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                const data = await response.json();
+
+                if (data.candidates && data.candidates.length > 0 &&
+                    data.candidates[0].content && data.candidates[0].content.parts &&
+                    data.candidates[0].content.parts.length > 0 &&
+                    data.candidates[0].content.parts[0].text) {
+                    return data.candidates[0].content.parts[0].text;
+                } else if (data.promptFeedback && data.promptFeedback.blockReason) {
+                    console.warn('Gemini API response blocked:', data.promptFeedback);
+                    let blockMessage = `Request blocked. Reason: ${data.promptFeedback.blockReason}.`;
+                    if (data.promptFeedback.safetyRatings && data.promptFeedback.safetyRatings.length > 0) {
+                        blockMessage += ` Categories: ${data.promptFeedback.safetyRatings.map(r => r.category).join(', ')}.`;
+                    }
+                    return blockMessage;
+                } else if (data.candidates && data.candidates.length > 0 && data.candidates[0].finishReason === "SAFETY") {
+                    console.warn('Gemini API response blocked due to safety settings:', data.candidates[0].safetyRatings);
+                     return "Response blocked due to safety guidelines. Please try rephrasing.";
+                } else {
+                    console.error('Unexpected Gemini API response structure:', data);
+                    return "Unexpected response from assistant.";
+                }
+
+            } catch (error) {
+                console.error('Error in callGeminiAPI:', error);
+                throw error;
+            }
+        }
+        userInput.focus();
+    </script>
+</body>
+</html>

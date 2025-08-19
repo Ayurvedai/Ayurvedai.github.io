@@ -3,71 +3,295 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Robot Patrol Interface</title>
-    
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS -->
+    <title>AI Lyricist & Melody Matcher</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Custom styles to complement Tailwind */
         body {
             font-family: 'Inter', sans-serif;
         }
-        .card {
-            background-color: white;
-            border-radius: 1rem; /* 16px */
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
         }
-        .status-badge {
-            font-family: monospace, monospace;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
 
-    <!-- Main container for the interface -->
-    <div class="w-full max-w-md mx-auto p-4">
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl w-full">
+        <div class="bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10">
+            <header class="text-center mb-8">
+                <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">AI Lyricist</h1>
+                <p class="text-gray-400 mt-2">Craft lyrics and find the perfect melody match.</p>
+            </header>
 
-        <!-- Header -->
-        <header class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-slate-800">Robot Control Panel</h1>
-            <p class="text-slate-500 mt-2">Manage patrol schedules and view health scan reports.</p>
-        </header>
-
-        <!-- Main content area -->
-        <main>
-            <!-- Card for setting patrol time -->
-            <div class="card p-6 md:p-8 mb-6">
-                <h2 class="text-xl font-semibold text-slate-700 border-b border-gray-200 pb-3 mb-4">Patrol Schedule</h2>
-                <div class="space-y-4">
+            <main>
+                <!-- Input Form -->
+                <div id="input-form" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div>
-                        <label for="patrol-time" class="block text-sm font-medium text-gray-700 mb-1">Set Patrol Time</label>
-                        <input type="time" id="patrol-time" name="patrol-time" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <label for="topic" class="block text-sm font-medium text-gray-300 mb-2">Topic / Theme</label>
+                        <input type="text" id="topic" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none" placeholder="e.g., Lost in a futuristic city">
                     </div>
-                    <button class="w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">
-                        Confirm Time
+                    <div>
+                        <label for="bpm" class="block text-sm font-medium text-gray-300 mb-2">Tempo (BPM)</label>
+                        <select id="bpm" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            <option value="70">Slow (70 BPM)</option>
+                            <option value="85">Chill (85 BPM)</option>
+                            <option value="100">Medium (100 BPM)</option>
+                            <option value="120" selected>Upbeat (120 BPM)</option>
+                            <option value="140">Fast (140 BPM)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="genre" class="block text-sm font-medium text-gray-300 mb-2">Genre</label>
+                        <select id="genre" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            <option value="pop">Pop</option>
+                            <option value="lo-fi">Lo-fi</option>
+                            <option value="folk">Folk</option>
+                            <option value="synthwave">Synthwave</option>
+                            <option value="ambient">Ambient</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="mood" class="block text-sm font-medium text-gray-300 mb-2">Mood</label>
+                        <select id="mood" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            <option value="happy">Happy</option>
+                            <option value="sad">Sad</option>
+                            <option value="dark">Dark</option>
+                            <option value="romantic">Romantic</option>
+                            <option value="energetic">Energetic</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button id="generate-btn" class="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300">
+                        Generate Lyrics
                     </button>
                 </div>
-            </div>
 
-            <!-- Card for displaying detection status -->
-            <div class="card p-6 md:p-8">
-                <h2 class="text-xl font-semibold text-slate-700 border-b border-gray-200 pb-3 mb-4">Health Scan Report</h2>
-                <div class="flex items-center justify-between">
-                    <p class="text-gray-600">Diseases Detected:</p>
-                    <span class="status-badge inline-flex items-center px-3 py-1 rounded-full text-base font-semibold bg-red-100 text-red-800">
-                        NA
-                    </span>
+                <!-- Loading Indicator -->
+                <div id="loader" class="hidden flex justify-center items-center my-8">
+                    <div class="loader"></div>
+                    <p class="ml-4 text-gray-400">Generating your song...</p>
                 </div>
-            </div>
-        </main>
+                
+                <!-- Error Message Box -->
+                <div id="error-box" class="hidden bg-red-900 border border-red-700 text-red-200 px-4 py-3 rounded-lg relative my-6" role="alert">
+                    <strong class="font-bold">Oops!</strong>
+                    <span class="block sm:inline" id="error-message">Something went wrong. Please try again.</span>
+                </div>
 
+
+                <!-- Results Section -->
+                <div id="results" class="hidden mt-10">
+                    <div class="bg-gray-800/50 p-6 rounded-xl">
+                        <h2 class="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">Matched Melody</h2>
+                        <div id="melody-player" class="bg-gray-700 p-4 rounded-lg">
+                             <p id="song-title" class="text-xl font-semibold mb-2"></p>
+                             <p id="song-description" class="text-gray-400 mb-4 text-sm"></p>
+                             <audio id="audio-player" controls class="w-full"></audio>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-800/50 p-6 rounded-xl mt-6">
+                        <h2 class="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">Generated Lyrics</h2>
+                        <div id="lyrics-output" class="text-gray-300 whitespace-pre-wrap bg-gray-700 p-4 rounded-lg h-96 overflow-y-auto"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
     </div>
 
+    <script>
+        const generateBtn = document.getElementById('generate-btn');
+        const inputForm = document.getElementById('input-form');
+        const loader = document.getElementById('loader');
+        const resultsDiv = document.getElementById('results');
+        const lyricsOutput = document.getElementById('lyrics-output');
+        const audioPlayer = document.getElementById('audio-player');
+        const songTitle = document.getElementById('song-title');
+        const songDescription = document.getElementById('song-description');
+        const errorBox = document.getElementById('error-box');
+        const errorMessage = document.getElementById('error-message');
+
+        // --- Song Library ---
+        // In a real application, these mp3 files would be hosted on your server.
+        // I'm using placeholder URLs here for demonstration.
+        const songLibrary = {
+            'song1': {
+                title: 'Midnight Drive',
+                description: '85 BPM - Lo-fi / Chillhop. A dark, introspective track for thoughtful lyrics.',
+                url: 'https://placehold.co/music/85-lofi-dark' // Placeholder
+            },
+            'song2': {
+                title: 'Sunrise Pop',
+                description: '120 BPM - Pop / Electronic. An upbeat, energetic track for happy, hopeful lyrics.',
+                url: 'https://placehold.co/music/120-pop-upbeat' // Placeholder
+            },
+            'song3': {
+                title: 'Acoustic Heart',
+                description: '100 BPM - Folk / Acoustic. A warm, sentimental piece for romantic or gentle lyrics.',
+                url: 'https://placehold.co/music/100-acoustic-warm' // Placeholder
+            },
+            'song4': {
+                title: 'Rogue Neon',
+                description: '140 BPM - Synthwave / Retro. A driving, tense track for futuristic or action themes.',
+                url: 'https://placehold.co/music/140-synthwave-dark' // Placeholder
+            },
+            'song5': {
+                title: 'Empty Ballroom',
+                description: '70 BPM - Ambient / Classical. A sad, ethereal piece for emotional lyrics.',
+                url: 'https://placehold.co/music/70-ambient-sad' // Placeholder
+            }
+        };
+
+        generateBtn.addEventListener('click', handleGeneration);
+
+        async function handleGeneration() {
+            // 1. Get user inputs
+            const topic = document.getElementById('topic').value || 'a random topic';
+            const bpm = document.getElementById('bpm').value;
+            const genre = document.getElementById('genre').value;
+            const mood = document.getElementById('mood').value;
+
+            // 2. Show loader and hide previous results
+            loader.classList.remove('hidden');
+            resultsDiv.classList.add('hidden');
+            errorBox.classList.add('hidden');
+            generateBtn.disabled = true;
+            generateBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // 3. Construct the prompt for the Gemini API
+            const prompt = `
+                You are an expert songwriter and music producer AI.
+                Your task is to generate song lyrics and then choose the best backing track from a predefined list.
+
+                **User's Request:**
+                - Topic: ${topic}
+                - Tempo: ${bpm} BPM
+                - Genre: ${genre}
+                - Mood: ${mood}
+
+                **Your Tasks:**
+                1.  **Write Song Lyrics:** Create a complete song with at least two verses and a chorus that fits the user's request. The lyrics should be creative and evocative.
+                2.  **Choose a Backing Track:** Based on the user's request AND the style of the lyrics you just wrote, select the *single best* matching song ID from the following library. Do not choose more than one.
+
+                **Song Library for Selection:**
+                - id: "song1", description: "85 BPM, Lo-fi/Chillhop, Dark, introspective, calm, melancholic"
+                - id: "song2", description: "120 BPM, Pop/Electronic, Upbeat, happy, energetic, hopeful"
+                - id: "song3", description: "100 BPM, Folk/Acoustic, Sentimental, warm, romantic, gentle"
+                - id: "song4", description: "140 BPM, Synthwave/Retro, Dark, driving, tense, futuristic"
+                - id: "song5", description: "70 BPM, Ambient/Classical, Sad, ethereal, spacious, emotional"
+
+                Only return the song ID that is the absolute best fit.
+            `;
+
+            // 4. Call the Gemini API
+            try {
+                const result = await callGemini(prompt);
+                
+                // 5. Process and display the results
+                if (result && result.lyrics && result.songId) {
+                    displayResults(result.lyrics, result.songId);
+                } else {
+                    throw new Error('Invalid response structure from API.');
+                }
+
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                showError('Failed to generate content. The model may be unavailable. Please try again later.');
+            } finally {
+                // 6. Hide loader and re-enable button
+                loader.classList.add('hidden');
+                generateBtn.disabled = false;
+                generateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function displayResults(lyrics, songId) {
+            lyricsOutput.innerText = lyrics;
+            
+            const selectedSong = songLibrary[songId];
+            if (selectedSong) {
+                songTitle.innerText = selectedSong.title;
+                songDescription.innerText = selectedSong.description;
+                audioPlayer.src = selectedSong.url;
+                resultsDiv.classList.remove('hidden');
+            } else {
+                showError(`The AI recommended a song ID ("${songId}") that doesn't exist in our library.`);
+            }
+        }
+
+        function showError(message) {
+            errorMessage.innerText = message;
+            errorBox.classList.remove('hidden');
+        }
+
+        async function callGemini(prompt) {
+            // IMPORTANT: In a real application, you should never expose your API key on the client-side.
+            // This should be handled by a backend server that makes the call to the Gemini API.
+            // For this self-contained example, we are leaving it as a placeholder.
+            const apiKey = ""; // Leave empty, it will be handled by the environment.
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{
+                    parts: [{ text: prompt }]
+                }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            "lyrics": { "type": "STRING" },
+                            "songId": { "type": "STRING" }
+                        },
+                        required: ["lyrics", "songId"]
+                    }
+                }
+            };
+            
+            let response;
+            try {
+                response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorBody = await response.json();
+                    console.error("API Error Response:", errorBody);
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+            } catch (networkError) {
+                 console.error("Network Error:", networkError);
+                 throw new Error("A network error occurred. Please check your connection.");
+            }
+
+
+            const result = await response.json();
+            
+            if (result.candidates && result.candidates.length > 0 &&
+                result.candidates[0].content && result.candidates[0].content.parts &&
+                result.candidates[0].content.parts.length > 0) {
+                const jsonText = result.candidates[0].content.parts[0].text;
+                return JSON.parse(jsonText);
+            } else {
+                console.error("Unexpected API response structure:", result);
+                throw new Error("Could not parse the response from the API.");
+            }
+        }
+
+    </script>
 </body>
 </html>

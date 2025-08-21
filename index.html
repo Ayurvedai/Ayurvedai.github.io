@@ -70,7 +70,6 @@
                             <option value="energetic">Energetic</option>
                         </select>
                     </div>
-                    <!-- New Language Dropdown -->
                     <div>
                         <label for="language" class="block text-sm font-medium text-gray-300 mb-2">Language</label>
                         <select id="language" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none">
@@ -153,7 +152,7 @@
             const bpm = document.getElementById('bpm').value;
             const genre = document.getElementById('genre').value;
             const mood = document.getElementById('mood').value;
-            const language = document.getElementById('language').value; // Get language value
+            const language = document.getElementById('language').value; 
 
             // 2. Show loader and hide previous results
             loader.classList.remove('hidden');
@@ -162,7 +161,7 @@
             generateBtn.disabled = true;
             generateBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
-            // 3. Construct the prompt for the Gemini API, now including language
+            // 3. Construct the prompt for the Gemini API, now including BPM again
             const prompt = `
                 You are an expert songwriter and music producer AI.
                 Your task is to generate song lyrics in a specific language and then choose the best backing track from a predefined list.
@@ -175,7 +174,7 @@
                 - Mood: ${mood}
 
                 **Your Tasks:**
-                1.  **Write Song Lyrics:** Create a complete song in **${language}** with at least two verses and a chorus that fits the user's request. The lyrics should be creative and evocative.
+                1.  **Write Song Lyrics:** Create a complete song in **${language}** with at least two verses and a chorus that fits the user's request.
                 2.  **Choose a Backing Track:** Based on the user's request AND the style of the lyrics you just wrote, select the *single best* matching song ID from the following library.
 
                 **Song Library for Selection:**
@@ -202,7 +201,7 @@
                 console.error("Error calling Gemini API:", error);
                 showError('Failed to generate content. The model may be unavailable. Please try again later.');
             } finally {
-                // 6. Hide loader and re-enable button
+                // 5. Hide loader and re-enable button
                 loader.classList.add('hidden');
                 generateBtn.disabled = false;
                 generateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -229,7 +228,7 @@
         }
 
         async function callGemini(prompt) {
-            const apiKey = ""; // Leave empty, it will be handled by the environment.
+            const apiKey = "AIzaSyB-ayGZexu1RBmTxkx_SYEKnI9qQtou06s"; // Leave empty, it will be handled by the environment.
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
             const payload = {

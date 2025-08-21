@@ -35,10 +35,10 @@
 
             <main>
                 <!-- Input Form -->
-                <div id="input-form" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div id="input-form" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div>
                         <label for="topic" class="block text-sm font-medium text-gray-300 mb-2">Topic / Theme</label>
-                        <input type="text" id="topic" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none" placeholder="e.g., Lost in a futuristic city">
+                        <input type="text" id="topic" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none" placeholder="e.g., Lost love">
                     </div>
                     <div>
                         <label for="bpm" class="block text-sm font-medium text-gray-300 mb-2">Tempo (BPM)</label>
@@ -68,6 +68,19 @@
                             <option value="dark">Dark</option>
                             <option value="romantic">Romantic</option>
                             <option value="energetic">Energetic</option>
+                        </select>
+                    </div>
+                    <!-- New Language Dropdown -->
+                    <div>
+                        <label for="language" class="block text-sm font-medium text-gray-300 mb-2">Language</label>
+                        <select id="language" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            <option value="English" selected>English</option>
+                            <option value="Spanish">Spanish</option>
+                            <option value="French">French</option>
+                            <option value="German">German</option>
+                            <option value="Japanese">Japanese</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="Portuguese">Portuguese</option>
                         </select>
                     </div>
                 </div>
@@ -124,34 +137,12 @@
         const errorMessage = document.getElementById('error-message');
 
         // --- Song Library ---
-        // In a real application, these mp3 files would be hosted on your server.
-        // I'm using placeholder URLs here for demonstration.
         const songLibrary = {
-            'song1': {
-                title: 'Midnight Drive',
-                description: '85 BPM - Lo-fi / Chillhop. A dark, introspective track for thoughtful lyrics.',
-                url: 'https://placehold.co/music/85-lofi-dark' // Placeholder
-            },
-            'song2': {
-                title: 'Sunrise Pop',
-                description: '120 BPM - Pop / Electronic. An upbeat, energetic track for happy, hopeful lyrics.',
-                url: 'https://placehold.co/music/120-pop-upbeat' // Placeholder
-            },
-            'song3': {
-                title: 'Acoustic Heart',
-                description: '100 BPM - Folk / Acoustic. A warm, sentimental piece for romantic or gentle lyrics.',
-                url: 'https://placehold.co/music/100-acoustic-warm' // Placeholder
-            },
-            'song4': {
-                title: 'Rogue Neon',
-                description: '140 BPM - Synthwave / Retro. A driving, tense track for futuristic or action themes.',
-                url: 'https://placehold.co/music/140-synthwave-dark' // Placeholder
-            },
-            'song5': {
-                title: 'Empty Ballroom',
-                description: '70 BPM - Ambient / Classical. A sad, ethereal piece for emotional lyrics.',
-                url: 'https://placehold.co/music/70-ambient-sad' // Placeholder
-            }
+            'song1': { title: 'Midnight Drive', description: '85 BPM - Lo-fi / Chillhop. A dark, introspective track.', url: 'music/song1.mp3' },
+            'song2': { title: 'Sunrise Pop', description: '120 BPM - Pop / Electronic. An upbeat, energetic track.', url: 'music/song2.mp3' },
+            'song3': { title: 'Acoustic Heart', description: '100 BPM - Folk / Acoustic. A warm, sentimental piece.', url: 'music/song3.mp3' },
+            'song4': { title: 'Rogue Neon', description: '140 BPM - Synthwave / Retro. A driving, tense track.', url: 'music/song4.mp3' },
+            'song5': { title: 'Empty Ballroom', description: '70 BPM - Ambient / Classical. A sad, ethereal piece.', url: 'music/song5.mp3' }
         };
 
         generateBtn.addEventListener('click', handleGeneration);
@@ -162,6 +153,7 @@
             const bpm = document.getElementById('bpm').value;
             const genre = document.getElementById('genre').value;
             const mood = document.getElementById('mood').value;
+            const language = document.getElementById('language').value; // Get language value
 
             // 2. Show loader and hide previous results
             loader.classList.remove('hidden');
@@ -170,20 +162,21 @@
             generateBtn.disabled = true;
             generateBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
-            // 3. Construct the prompt for the Gemini API
+            // 3. Construct the prompt for the Gemini API, now including language
             const prompt = `
                 You are an expert songwriter and music producer AI.
-                Your task is to generate song lyrics and then choose the best backing track from a predefined list.
+                Your task is to generate song lyrics in a specific language and then choose the best backing track from a predefined list.
 
                 **User's Request:**
+                - Language for Lyrics: ${language}
                 - Topic: ${topic}
                 - Tempo: ${bpm} BPM
                 - Genre: ${genre}
                 - Mood: ${mood}
 
                 **Your Tasks:**
-                1.  **Write Song Lyrics:** Create a complete song with at least two verses and a chorus that fits the user's request. The lyrics should be creative and evocative.
-                2.  **Choose a Backing Track:** Based on the user's request AND the style of the lyrics you just wrote, select the *single best* matching song ID from the following library. Do not choose more than one.
+                1.  **Write Song Lyrics:** Create a complete song in **${language}** with at least two verses and a chorus that fits the user's request. The lyrics should be creative and evocative.
+                2.  **Choose a Backing Track:** Based on the user's request AND the style of the lyrics you just wrote, select the *single best* matching song ID from the following library.
 
                 **Song Library for Selection:**
                 - id: "song1", description: "85 BPM, Lo-fi/Chillhop, Dark, introspective, calm, melancholic"
@@ -199,7 +192,6 @@
             try {
                 const result = await callGemini(prompt);
                 
-                // 5. Process and display the results
                 if (result && result.lyrics && result.songId) {
                     displayResults(result.lyrics, result.songId);
                 } else {
@@ -237,9 +229,6 @@
         }
 
         async function callGemini(prompt) {
-            // IMPORTANT: In a real application, you should never expose your API key on the client-side.
-            // This should be handled by a backend server that makes the call to the Gemini API.
-            // For this self-contained example, we are leaving it as a placeholder.
             const apiKey = ""; // Leave empty, it will be handled by the environment.
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
@@ -277,7 +266,6 @@
                  console.error("Network Error:", networkError);
                  throw new Error("A network error occurred. Please check your connection.");
             }
-
 
             const result = await response.json();
             

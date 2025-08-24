@@ -7,9 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
+        body { font-family: 'Inter', sans-serif; }
         .loader {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #3498db;
@@ -102,7 +100,6 @@
                     <span class="block sm:inline" id="error-message">Something went wrong. Please try again.</span>
                 </div>
 
-
                 <!-- Results Section -->
                 <div id="results" class="hidden mt-10">
                     <div class="bg-gray-800/50 p-6 rounded-xl">
@@ -125,7 +122,6 @@
 
     <script>
         const generateBtn = document.getElementById('generate-btn');
-        const inputForm = document.getElementById('input-form');
         const loader = document.getElementById('loader');
         const resultsDiv = document.getElementById('results');
         const lyricsOutput = document.getElementById('lyrics-output');
@@ -135,87 +131,56 @@
         const errorBox = document.getElementById('error-box');
         const errorMessage = document.getElementById('error-message');
 
+        // Detect base URL (works for GitHub Pages automatically)
+        const baseURL = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, "/");
+        console.log("Base URL detected:", baseURL);
+
         // --- Song Library ---
         const songLibrary = {
-            'song1': { title: 'Midnight Drive', description: '85 BPM - Lo-fi / Chillhop. A dark, introspective track.', url: 'music/song1.mp3' },
-            'song2': { title: 'Sunrise Pop', description: '120 BPM - Pop / Electronic. An upbeat, energetic track.', url: 'music/song2.mp3' },
-            'song3': { title: 'Acoustic Heart', description: '100 BPM - Folk / Acoustic. A warm, sentimental piece.', url: 'music/song3.mp3' },
-            'song4': { title: 'Rogue Neon', description: '140 BPM - Synthwave / Retro. A driving, tense track.', url: 'music/song4.mp3' },
-            'song5': { title: 'Empty Ballroom', description: '70 BPM - Ambient / Classical. A sad, ethereal piece.', url: 'music/song5.mp3' }
+            'song1': { title: 'Midnight Drive', description: '85 BPM - Lo-fi / Chillhop. A dark, introspective track.', url: baseURL + 'music/song1.mp3' },
+            'song2': { title: 'Sunrise Pop', description: '120 BPM - Pop / Electronic. An upbeat, energetic track.', url: baseURL + 'music/song2.mp3' },
+            'song3': { title: 'Acoustic Heart', description: '100 BPM - Folk / Acoustic. A warm, sentimental piece.', url: baseURL + 'music/song3.mp3' },
+            'song4': { title: 'Rogue Neon', description: '140 BPM - Synthwave / Retro. A driving, tense track.', url: baseURL + 'music/song4.mp3' },
+            'song5': { title: 'Empty Ballroom', description: '70 BPM - Ambient / Classical. A sad, ethereal piece.', url: baseURL + 'music/song5.mp3' }
         };
 
         generateBtn.addEventListener('click', handleGeneration);
 
         async function handleGeneration() {
-            // 1. Get user inputs
-            const topic = document.getElementById('topic').value || 'a random topic';
-            const bpm = document.getElementById('bpm').value;
-            const genre = document.getElementById('genre').value;
-            const mood = document.getElementById('mood').value;
-            const language = document.getElementById('language').value; 
+            console.log("Generate button clicked!");
 
-            // 2. Show loader and hide previous results
             loader.classList.remove('hidden');
             resultsDiv.classList.add('hidden');
             errorBox.classList.add('hidden');
             generateBtn.disabled = true;
-            generateBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
-            // 3. Construct the prompt for the Gemini API, now including BPM again
-            const prompt = `
-                You are an expert songwriter and music producer AI.
-                Your task is to generate song lyrics in a specific language and then choose the best backing track from a predefined list.
-
-                **User's Request:**
-                - Language for Lyrics: ${language}
-                - Topic: ${topic}
-                - Tempo: ${bpm} BPM
-                - Genre: ${genre}
-                - Mood: ${mood}
-
-                **Your Tasks:**
-                1.  **Write Song Lyrics:** Create a complete song in **${language}** with at least two verses and a chorus that fits the user's request.
-                2.  **Choose a Backing Track:** Based on the user's request AND the style of the lyrics you just wrote, select the *single best* matching song ID from the following library.
-
-                **Song Library for Selection:**
-                - id: "song1", description: "85 BPM, Lo-fi/Chillhop, Dark, introspective, calm, melancholic"
-                - id: "song2", description: "120 BPM, Pop/Electronic, Upbeat, happy, energetic, hopeful"
-                - id: "song3", description: "100 BPM, Folk/Acoustic, Sentimental, warm, romantic, gentle"
-                - id: "song4", description: "140 BPM, Synthwave/Retro, Dark, driving, tense, futuristic"
-                - id: "song5", description: "70 BPM, Ambient/Classical, Sad, ethereal, spacious, emotional"
-
-                Only return the song ID that is the absolute best fit.
-            `;
-
-            // 4. Call the Gemini API
             try {
-                const result = await callGemini(prompt);
-                
-                if (result && result.lyrics && result.songId) {
-                    displayResults(result.lyrics, result.songId);
-                } else {
-                    throw new Error('Invalid response structure from API.');
-                }
+                // Simulated result for debugging (remove when API works)
+                const fakeResult = { lyrics: "This is a test lyric.\nSecond line of the song.", songId: "song2" };
+                console.log("Fake API response:", fakeResult);
+
+                displayResults(fakeResult.lyrics, fakeResult.songId);
 
             } catch (error) {
-                console.error("Error calling Gemini API:", error);
-                showError('Failed to generate content. The model may be unavailable. Please try again later.');
+                console.error("Error:", error);
+                showError(error.message);
             } finally {
-                // 5. Hide loader and re-enable button
                 loader.classList.add('hidden');
                 generateBtn.disabled = false;
-                generateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         }
 
         function displayResults(lyrics, songId) {
             lyricsOutput.innerText = lyrics;
-            
+
             const selectedSong = songLibrary[songId];
+            console.log("Selected song:", selectedSong);
+
             if (selectedSong) {
                 songTitle.innerText = selectedSong.title;
                 songDescription.innerText = selectedSong.description;
                 audioPlayer.src = selectedSong.url;
+                console.log("Audio player src set to:", audioPlayer.src);
                 resultsDiv.classList.remove('hidden');
             } else {
                 showError(`The AI recommended a song ID ("${songId}") that doesn't exist in our library.`);
@@ -226,59 +191,6 @@
             errorMessage.innerText = message;
             errorBox.classList.remove('hidden');
         }
-
-        async function callGemini(prompt) {
-            const apiKey = "AIzaSyB-ayGZexu1RBmTxkx_SYEKnI9qQtou06s"; // Leave empty, it will be handled by the environment.
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-            const payload = {
-                contents: [{
-                    parts: [{ text: prompt }]
-                }],
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            "lyrics": { "type": "STRING" },
-                            "songId": { "type": "STRING" }
-                        },
-                        required: ["lyrics", "songId"]
-                    }
-                }
-            };
-            
-            let response;
-            try {
-                response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const errorBody = await response.json();
-                    console.error("API Error Response:", errorBody);
-                    throw new Error(`API request failed with status ${response.status}`);
-                }
-            } catch (networkError) {
-                 console.error("Network Error:", networkError);
-                 throw new Error("A network error occurred. Please check your connection.");
-            }
-
-            const result = await response.json();
-            
-            if (result.candidates && result.candidates.length > 0 &&
-                result.candidates[0].content && result.candidates[0].content.parts &&
-                result.candidates[0].content.parts.length > 0) {
-                const jsonText = result.candidates[0].content.parts[0].text;
-                return JSON.parse(jsonText);
-            } else {
-                console.error("Unexpected API response structure:", result);
-                throw new Error("Could not parse the response from the API.");
-            }
-        }
-
     </script>
 </body>
 </html>

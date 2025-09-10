@@ -6,6 +6,7 @@
     <title>AI Lyricist & Melody Matcher</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -24,17 +25,16 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+<body class="bg-gray-900 text-white flex flex-col min-h-screen">
 
     <div class="container mx-auto p-4 md:p-8 max-w-4xl w-full">
         <div class="bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10">
             <header class="text-center mb-8">
                 <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">AI Lyricist</h1>
-                <p class="text-gray-400 mt-2">Craft lyrics and find the perfect melody match.</p>
+                <p class="text-gray-400 mt-2">Craft lyrics, match melodies, and now fuse two songs together.</p>
             </header>
 
             <main>
-                <!-- Input Form -->
                 <div id="input-form" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div>
                         <label for="topic" class="block text-sm font-medium text-gray-300 mb-2">Topic / Theme</label>
@@ -84,33 +84,52 @@
                     </div>
                 </div>
 
-                <div class="text-center">
+                <div class="text-center mb-10">
                     <button id="generate-btn" class="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300">
                         Generate Lyrics
                     </button>
                 </div>
 
-                <!-- Loading Indicator -->
+                <div class="mt-10 bg-gray-800/50 p-6 rounded-xl">
+                    <h2 class="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">Fuse Two Lyrics</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="lyric1" class="block text-sm font-medium text-gray-300 mb-2">Lyrics 1</label>
+                            <textarea id="lyric1" rows="6"
+                                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                                placeholder="Paste first lyrics here..."></textarea>
+                        </div>
+                        <div>
+                            <label for="lyric2" class="block text-sm font-medium text-gray-300 mb-2">Lyrics 2</label>
+                            <textarea id="lyric2" rows="6"
+                                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                                placeholder="Paste second lyrics here..."></textarea>
+                        </div>
+                    </div>
+                    <div class="text-center mt-6">
+                        <button id="fuse-btn" class="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300">
+                            Fuse Lyrics
+                        </button>
+                    </div>
+                </div>
+
                 <div id="loader" class="hidden flex justify-center items-center my-8">
                     <div class="loader"></div>
                     <p class="ml-4 text-gray-400">Generating your song...</p>
                 </div>
                 
-                <!-- Error Message Box -->
                 <div id="error-box" class="hidden bg-red-900 border border-red-700 text-red-200 px-4 py-3 rounded-lg relative my-6" role="alert">
                     <strong class="font-bold">Oops!</strong>
                     <span class="block sm:inline" id="error-message">Something went wrong. Please try again.</span>
                 </div>
 
-
-                <!-- Results Section -->
                 <div id="results" class="hidden mt-10">
                     <div class="bg-gray-800/50 p-6 rounded-xl">
                         <h2 class="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">Matched Melody</h2>
                         <div id="melody-player" class="bg-gray-700 p-4 rounded-lg">
-                             <p id="song-title" class="text-xl font-semibold mb-2"></p>
-                             <p id="song-description" class="text-gray-400 mb-4 text-sm"></p>
-                             <audio id="audio-player" controls class="w-full"></audio>
+                            <p id="song-title" class="text-xl font-semibold mb-2"></p>
+                            <p id="song-description" class="text-gray-400 mb-4 text-sm"></p>
+                            <audio id="audio-player" controls class="w-full"></audio>
                         </div>
                     </div>
 
@@ -123,8 +142,15 @@
         </div>
     </div>
 
+    <footer class="bg-gray-800 text-gray-400 p-6 md:p-8 mt-12 w-full text-center">
+        <div class="max-w-4xl mx-auto">
+            <p class="text-sm">&copy; 2025 AI Lyricist. All Rights Reserved.</p>
+            <p class="text-xs mt-1">Assisted by Kavish | <a href="mailto:kavishbaghla@gmail.com" class="text-blue-400 hover:underline">kavishbaghla@gmail.com</a></p>
+        </div>
+    </footer>
     <script>
         const generateBtn = document.getElementById('generate-btn');
+        const fuseBtn = document.getElementById('fuse-btn');
         const loader = document.getElementById('loader');
         const resultsDiv = document.getElementById('results');
         const lyricsOutput = document.getElementById('lyrics-output');
@@ -144,6 +170,7 @@
         };
 
         generateBtn.addEventListener('click', handleGeneration);
+        fuseBtn.addEventListener('click', handleFusion);
 
         async function handleGeneration() {
             const topic = document.getElementById('topic').value || 'a random topic';
@@ -158,35 +185,28 @@
             generateBtn.disabled = true;
             generateBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
+            // --- CHANGE 1: Modified the prompt to only ask for lyrics ---
             const prompt = `
-                You are an expert songwriter and music producer AI.
-                Your task is to generate song lyrics in a specific language and then choose the best backing track from a predefined list.
+                You are an expert songwriter AI.
+                Generate complete song lyrics in **${language}**.
 
-                **User's Request:**
-                - Language for Lyrics: ${language}
-                - Topic: ${topic}
-                - Tempo: ${bpm} BPM
-                - Genre: ${genre}
-                - Mood: ${mood}
+                Topic: ${topic}
+                Tempo: ${bpm} BPM
+                Genre: ${genre}
+                Mood: ${mood}
 
-                **Your Tasks:**
-                1.  **Write Song Lyrics:** Create a complete song in **${language}** with at least two verses and a chorus that fits the user's request.
-                2.  **Choose a Backing Track:** Based on the user's request AND the style of the lyrics you just wrote, select the *single best* matching song ID from the following library.
-
-                **Song Library for Selection:**
-                - id: "song1", description: "85 BPM, Lo-fi/Chillhop, Dark, introspective, calm, melancholic"
-                - id: "song2", description: "120 BPM, Pop/Electronic, Upbeat, happy, energetic, hopeful"
-                - id: "song3", description: "100 BPM, Folk/Acoustic, Sentimental, warm, romantic, gentle"
-                - id: "song4", description: "140 BPM, Synthwave/Retro, Dark, driving, tense, futuristic"
-                - id: "song5", description: "70 BPM, Ambient/Classical, Sad, ethereal, spacious, emotional"
-
-                Only return the song ID that is the absolute best fit.
+                Return JSON with a single key "lyrics":
+                {
+                    "lyrics": "string"
+                }
             `;
 
             try {
                 const result = await callGemini(prompt);
-                if (result && result.lyrics && result.songId) {
-                    displayResults(result.lyrics, result.songId);
+                if (result && result.lyrics) {
+                    // --- CHANGE 2: Pick a random song ID locally ---
+                    const randomSongId = getRandomSongId();
+                    displayResults(result.lyrics, randomSongId);
                 } else {
                     throw new Error('Invalid response structure from API.');
                 }
@@ -200,6 +220,65 @@
             }
         }
 
+        async function handleFusion() {
+            const lyric1 = document.getElementById('lyric1').value.trim();
+            const lyric2 = document.getElementById('lyric2').value.trim();
+
+            if (!lyric1 || !lyric2) {
+                showError('Please paste both lyrics before fusing.');
+                return;
+            }
+
+            loader.classList.remove('hidden');
+            resultsDiv.classList.add('hidden');
+            errorBox.classList.add('hidden');
+            fuseBtn.disabled = true;
+            fuseBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // --- CHANGE 1 (Fusion): Modified the prompt to only ask for lyrics ---
+            const prompt = `
+                You are an expert songwriter AI.
+                Take the following two sets of lyrics and fuse them into one cohesive song.
+                Make sure the transitions feel natural, and keep at least two verses and one chorus.
+
+                Lyrics 1:
+                ${lyric1}
+
+                Lyrics 2:
+                ${lyric2}
+
+                Return JSON with a single key "lyrics":
+                {
+                    "lyrics": "string"
+                }
+            `;
+
+            try {
+                const result = await callGemini(prompt);
+                if (result && result.lyrics) {
+                    // --- CHANGE 2 (Fusion): Pick a random song ID locally ---
+                    const randomSongId = getRandomSongId();
+                    displayResults(result.lyrics, randomSongId);
+                } else {
+                    throw new Error('Invalid response structure from API.');
+                }
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                showError('Failed to fuse lyrics. Please try again later.');
+            } finally {
+                loader.classList.add('hidden');
+                fuseBtn.disabled = false;
+                fuseBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        // --- CHANGE 3: New function to get a random song ID ---
+        function getRandomSongId() {
+            const songIds = Object.keys(songLibrary);
+            const randomIndex = Math.floor(Math.random() * songIds.length);
+            return songIds[randomIndex];
+        }
+
         function displayResults(lyrics, songId) {
             lyricsOutput.innerText = lyrics;
             const selectedSong = songLibrary[songId];
@@ -207,10 +286,10 @@
                 songTitle.innerText = selectedSong.title;
                 songDescription.innerText = selectedSong.description;
                 audioPlayer.src = selectedSong.url;
-                console.log("Loading audio:", selectedSong.url); // Debugging
                 resultsDiv.classList.remove('hidden');
             } else {
-                showError(`The AI recommended a song ID ("${songId}") that doesn't exist in our library.`);
+                // This error is now unlikely but good to keep as a fallback
+                showError(`Could not find a song with ID "${songId}" in our library.`);
             }
         }
 
@@ -220,9 +299,11 @@
         }
 
         async function callGemini(prompt) {
+            // IMPORTANT: Replace with your actual API key
             const apiKey = "AIzaSyB-ayGZexu1RBmTxkx_SYEKnI9qQtou06s";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
+            // --- CHANGE 4: Updated the response schema ---
             const payload = {
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: {
@@ -230,10 +311,9 @@
                     responseSchema: {
                         type: "OBJECT",
                         properties: {
-                            "lyrics": { "type": "STRING" },
-                            "songId": { "type": "STRING" }
+                            "lyrics": { "type": "STRING" }
                         },
-                        required: ["lyrics", "songId"]
+                        required: ["lyrics"]
                     }
                 }
             };
@@ -252,8 +332,8 @@
                     throw new Error(`API request failed with status ${response.status}`);
                 }
             } catch (networkError) {
-                 console.error("Network Error:", networkError);
-                 throw new Error("A network error occurred. Please check your connection.");
+                console.error("Network Error:", networkError);
+                throw new Error("A network error occurred. Please check your connection.");
             }
 
             const result = await response.json();

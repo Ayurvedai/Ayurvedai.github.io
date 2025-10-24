@@ -1,29 +1,340 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fullscreen Iframe</title>
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-    }
-    iframe {  
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 90vw;
-      height: 80vh;
-      border: none;
-    }
-  </style>
-<img src="uddiyan.png" alt="hehe image" style="position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 200px;">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Lyricist & Melody Matcher</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
-<body>
-  <iframe src="https://ayurvedai.github.io."></iframe>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl w-full">
+        <div class="bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10">
+            <header class="text-center mb-8">
+                <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">AI Lyricist</h1>
+                <p class="text-gray-400 mt-2">Craft lyrics and find the perfect melody match.</p>
+            </header>
+
+            <main>
+                <div id="input-form" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div>
+                        <label for="topic" class="block text-sm font-medium text-gray-300 mb-2">Topic / Theme</label>
+                        <input type="text" id="topic" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none" placeholder="e.g., Lost in a futuristic city">
+                    </div>
+                    <div>
+                        <label for="bpm" class="block text-sm font-medium text-gray-300 mb-2">Tempo (BPM)</label>
+                        <select id="bpm" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            <option value="70">Slow (70 BPM)</option>
+                            <option value="85">Chill (85 BPM)</option>
+                            <option value="100">Medium (100 BPM)</option>
+                            <option value="120" selected>Upbeat (120 BPM)</option>
+                            <option value="140">Fast (140 BPM)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="genre" class="block text-sm font-medium text-gray-300 mb-2">Genre</label>
+                        <select id="genre" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            <option value="pop">Pop</option>
+                            <option value="lo-fi">Lo-fi</option>
+                            <option value="folk">Folk</option>
+                            <option value="synthwave">Synthwave</option>
+                            <option value="ambient">Ambient</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="mood" class="block text-sm font-medium text-gray-300 mb-2">Mood</label>
+                        <select id="mood" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                            <option value="happy">Happy</option>
+                            <option value="sad">Sad</option>
+                            <option value="dark">Dark</option>
+                            <option value="romantic">Romantic</option>
+                            <option value="energetic">Energetic</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="generate-btn-container" class="text-center">
+                    <button id="generate-btn" class="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300">
+                        Generate Lyrics
+                    </button>
+                </div>
+
+                <div id="ad-section" class="hidden text-center my-8">
+                    <p class="text-gray-400 mb-4">Please watch this short message...</p>
+                    <video id="ad-video" class="w-full rounded-lg" controls autoplay muted playsinline>
+                        <source src="add.mp4" type="video/mp4">
+                        Your browser does not support the video tag. (Please add add.mp4)
+                    </video>
+                    <button id="actual-generate-btn" class="hidden mt-4 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300">
+                        Generate Now
+                    </button>
+                    <div id="ad-timer" class="mt-4 text-gray-400">
+                        You can generate in 30 seconds...
+                    </div>
+                </div>
+
+                <div id="loader" class="hidden flex justify-center items-center my-8">
+                    <div class="loader"></div>
+                    <p class="ml-4 text-gray-400">Generating your song...</p>
+                </div>
+                
+                <div id="error-box" class="hidden bg-red-900 border border-red-700 text-red-200 px-4 py-3 rounded-lg relative my-6" role="alert">
+                    <strong class="font-bold">Oops!</strong>
+                    <span class="block sm:inline" id="error-message">Something went wrong. Please try again.</span>
+                </div>
+
+
+                <div id="results" class="hidden mt-10">
+                    <div class="bg-gray-800/50 p-6 rounded-xl">
+                        <h2 class="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">Matched Melody</h2>
+                        <div id="melody-player" class="bg-gray-700 p-4 rounded-lg">
+                             <p id="song-title" class="text-xl font-semibold mb-2"></p>
+                             <p id="song-description" class="text-gray-400 mb-4 text-sm"></p>
+                             <audio id="audio-player" controls class="w-full"></audio>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-800/50 p-6 rounded-xl mt-6">
+                        <h2 class="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">Generated Lyrics</h2>
+                        <div id="lyrics-output" class="text-gray-300 whitespace-pre-wrap bg-gray-700 p-4 rounded-lg h-96 overflow-y-auto"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const generateBtn = document.getElementById('generate-btn');
+        const generateBtnContainer = document.getElementById('generate-btn-container');
+        const inputForm = document.getElementById('input-form');
+        const loader = document.getElementById('loader');
+        const resultsDiv = document.getElementById('results');
+        const lyricsOutput = document.getElementById('lyrics-output');
+        const audioPlayer = document.getElementById('audio-player');
+        const songTitle = document.getElementById('song-title');
+        const songDescription = document.getElementById('song-description');
+        const errorBox = document.getElementById('error-box');
+        const errorMessage = document.getElementById('error-message');
+
+        const adSection = document.getElementById('ad-section');
+        const adVideo = document.getElementById('ad-video');
+        const actualGenerateBtn = document.getElementById('actual-generate-btn');
+        const adTimer = document.getElementById('ad-timer');
+        let adTimerInterval;
+
+        const songLibrary = {
+            'song1': { title: 'Midnight Drive', description: '85 BPM - Lo-fi / Chillhop...', url: 'https://placehold.co/music/85-lofi-dark' },
+            'song2': { title: 'Sunrise Pop', description: '120 BPM - Pop / Electronic...', url: 'https://placehold.co/music/120-pop-upbeat' },
+            'song3': { title: 'Acoustic Heart', description: '100 BPM - Folk / Acoustic...', url: 'https://placehold.co/music/100-acoustic-warm' },
+            'song4': { title: 'Rogue Neon', description: '140 BPM - Synthwave / Retro...', url: 'https://placehold.co/music/140-synthwave-dark' },
+            'song5': { title: 'Empty Ballroom', description: '70 BPM - Ambient / Classical...', url: 'https://placehold.co/music/70-ambient-sad' }
+        };
+
+        generateBtn.addEventListener('click', showAd);
+
+        // ***FIX 1:*** This listener no longer shows the form.
+        // It just hides the ad and starts the API call.
+        actualGenerateBtn.addEventListener('click', () => {
+            adSection.classList.add('hidden');
+            if (adTimerInterval) {
+                clearInterval(adTimerInterval); // Stop timer if user clicks early
+            }
+            performApiCall();
+        });
+
+        function showAd() {
+            inputForm.classList.add('hidden');
+            generateBtnContainer.classList.add('hidden');
+            resultsDiv.classList.add('hidden');
+            errorBox.classList.add('hidden');
+            loader.classList.add('hidden');
+
+            adSection.classList.remove('hidden');
+
+            adVideo.currentTime = 0;
+            adVideo.play().catch(error => {
+                console.warn("Autoplay was prevented:", error);
+            });
+
+            let countdown = 30;
+            adTimer.innerText = `You can generate in ${countdown} seconds...`;
+            actualGenerateBtn.classList.add('hidden');
+            adTimer.classList.remove('hidden');     
+            
+            if (adTimerInterval) {
+                clearInterval(adTimerInterval);
+            }
+
+            adTimerInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    adTimer.innerText = `You can generate in ${countdown} seconds...`;
+                } else {
+                    clearInterval(adTimerInterval);
+                    adTimer.classList.add('hidden');
+                    actualGenerateBtn.classList.remove('hidden');
+                }
+            }, 1000);
+        }
+
+        async function performApiCall() {
+            const topic = document.getElementById('topic').value || 'a random topic';
+            const bpm = document.getElementById('bpm').value;
+            const genre = document.getElementById('genre').value;
+            const mood = document.getElementById('mood').value;
+
+            // Form is already hidden, so just show loader
+            loader.classList.remove('hidden');
+            resultsDiv.classList.add('hidden');
+            errorBox.classList.add('hidden');
+            generateBtn.disabled = true;
+            generateBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const prompt = `
+                You are an expert songwriter...
+                Topic: ${topic}, Tempo: ${bpm}, Genre: ${genre}, Mood: ${mood}
+                ...
+                **Song Library for Selection:**
+                - id: "song1", description: "85 BPM, Lo-fi/Chillhop, Dark, introspective, calm, melancholic"
+                - id: "song2", description: "120 BPM, Pop/Electronic, Upbeat, happy, energetic, hopeful"
+                - id: "song3", description: "100 BPM, Folk/Acoustic, Sentimental, warm, romantic, gentle"
+                - id: "song4", description: "140 BPM, Synthwave/Retro, Dark, driving, tense, futuristic"
+                - id: "song5", description: "70 BPM, Ambient/Classical, Sad, ethereal, spacious, emotional"
+                ...
+            `;
+
+            try {
+                const result = await callGemini(prompt);
+                
+                if (result && result.lyrics && result.songId) {
+                    displayResults(result.lyrics, result.songId);
+                } else {
+                    throw new Error('Invalid response structure from API.');
+                }
+
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                showError('Failed to generate content. The model may be unavailable. Please try again later.');
+            } finally {
+                // ***FIX 2:*** This 'finally' block now correctly
+                // resets the UI by re-showing the form and button.
+                loader.classList.add('hidden');
+                
+                // Show the form again so the user can make a new song
+                inputForm.classList.remove('hidden');
+                generateBtnContainer.classList.remove('hidden');
+                
+                generateBtn.disabled = false;
+                generateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function displayResults(lyrics, songId) {
+            lyricsOutput.innerText = lyrics;
+            
+            const selectedSong = songLibrary[songId];
+            if (selectedSong) {
+                songTitle.innerText = selectedSong.title;
+                songDescription.innerText = selectedSong.description;
+                audioPlayer.src = selectedSong.url;
+                resultsDiv.classList.remove('hidden');
+            } else {
+                showError(`The AI recommended a song ID ("${songId}") that doesn't exist in our library.`);
+            }
+        }
+
+        function showError(message) {
+            errorMessage.innerText = message;
+            errorBox.classList.remove('hidden');
+        }
+
+        async function callGemini(prompt) {
+            // --->>> ***IMPORTANT*** <<<---
+            // You MUST put your API key here for it to work.
+            const apiKey = "AIzaSyDVseil_4n33NFjNhfiOhG7GtxKrSkpVGU"; // <<<--- ADD YOUR KEY HERE
+            // -----------------------------
+
+            if (apiKey === "YOUR_API_KEY_HERE" || apiKey === "") {
+                 throw new Error("API key is missing. Please add your API key to the callGemini function.");
+            }
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            const payload = {	
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            "lyrics": { "type": "STRING" },
+                            "songId": { "type": "STRING" }
+                        },
+                        required: ["lyrics", "songId"]
+                    }
+                }
+            };
+            
+            let response;
+            try {
+                response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorBody = await response.json();
+                    console.error("API Error Response:", errorBody);
+                    // Provide a more specific error if possible
+                    let errorMsg = errorBody?.error?.message || `API request failed with status ${response.status}`;
+                    if (errorMsg.includes("API key not valid")) {
+                        errorMsg = "The API Key is not valid. Please check your key.";
+                    } else if (errorMsg.includes("permission")) {
+                         errorMsg = "API Key Permission Error. You may need to enable 'HTTP referrers' in your Google Cloud console.";
+                    }
+                    throw new Error(errorMsg);
+                }
+            } catch (networkError) {
+                 console.error("Network Error:", networkError);
+                 // Check if it's a CORS error, which is common
+                 if (networkError.message.includes("Failed to fetch")) {
+                    throw new Error("A network error occurred. This is often a CORS policy issue. Make sure your API key is configured to allow requests from this domain.");
+                 }
+                 throw new Error("A network error occurred. Please check your connection.");
+            }
+
+            const result = await response.json();
+            
+            if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0]) {
+                const jsonText = result.candidates[0].content.parts[0].text;
+                return JSON.parse(jsonText);
+            } else {
+                console.error("Unexpected API response structure:", result);
+                if (result.candidates && result.candidates[0].finishReason === 'SAFETY') {
+                    throw new Error("Generation failed due to safety settings. Try a different prompt.");
+                }
+                throw new Error("Could not parse the response from the API.");
+            }
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CropShield Live Event Feed</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide/dist/lucide.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Unified brand colors from H1 gradient */
+    --brand-primary: #16a34a; /* Tailwind green-600 */
+    --brand-light: #4ade80;   /* Tailwind green-400 */
+    --bg-dark: #111827;
+    --bg-light: #1F2937;
+    --border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-dark);
+    color: #ffffff;
+    background-image:
+      radial-gradient(at 20% 30%, hsla(145, 63%, 42%, 0.05) 0px, transparent 50%),
+      radial-gradient(at 80% 70%, hsla(160, 60%, 30%, 0.05) 0px, transparent 50%);
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  .glass-card {
+    background: rgba(31, 41, 55, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 1.25rem; /* Softer, more premium radius */
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.5s ease-out; /* Smoother ease */
+  }
+
+  .glass-card.show { opacity: 1; transform: translateY(0); }
+  
+  /* Refined "new" state with subtle glow */
+  .glass-card.new {
+    border-left: 4px solid var(--brand-light);
+    animation: glowFade 3s forwards ease-out;
+  }
+
+  @keyframes glowFade {
+    0% {
+      box-shadow: 0 0 15px rgba(74, 222, 128, 0.5); /* Softer rgba glow */
+      border-left-color: var(--brand-light);
+    }
+    100% {
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* Fade to standard shadow */
+      border-left-color: transparent;
+    }
+  }
+
+  .badge-new {
+    background-color: var(--brand-primary);
+    color: #ffffff; /* Better contrast */
+    font-weight: 600;
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.25rem;
+    margin-left: 0.5rem;
+    animation: fadeBadge 3s forwards;
+  }
+
+  @keyframes fadeBadge {
+    0% { opacity: 1; }
+    80% { opacity: 1; } /* Hold badge for a moment */
+    100% { opacity: 0; }
+  }
+
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: rgba(31,41,55,0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color); /* Added border */
+    border-radius: 1rem; /* Matched card radius */
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* Softer shadow */
+  }
+
+  .status-live {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--brand-light); /* Use light brand color */
+  }
+
+  .status-dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background-color: var(--brand-light); /* Use light brand color */
+    animation: pulse 1.2s infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4); }
+    50% { transform: scale(1.1); box-shadow: 0 0 8px 4px rgba(74, 222, 128, 0.1); }
+  }
+
+  /* Scrollbar styles */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-light); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+</style>
+</head>
+<body class="flex justify-center items-start">
+
+<div class="w-full max-w-4xl mx-auto">
+
+  <div class="text-center mb-8">
+    <h1 class="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-green-600 drop-shadow-lg">
+      CropShield Live Event Feed
+    </h1>
+    <p class="text-gray-400 mt-2 text-lg">Monitoring crops in real-time for weeds, pests, and diseases</p>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-live">
+      <div class="status-dot"></div>
+      <span>SYSTEM LIVE</span> </div>
+    <div id="lastCheck" class="text-gray-400 text-sm">Last check: --</div>
+  </div>
+
+  <div id="eventFeed" class="space-y-2 max-h-[70vh] overflow-y-auto pr-2"></div>
+
+</div>
+
+<script>
+const feedContainer = document.getElementById('eventFeed');
+const lastCheck = document.getElementById('lastCheck');
+let displayedEvents = new Set();
+
+function getRelativeTime(timestamp){
+  const eventTime = new Date(timestamp);
+  const now = new Date();
+  const diff = Math.floor((now - eventTime)/1000);
+  if(diff<5) return 'Just now';
+  if(diff<60) return diff + ' seconds ago';
+  const mins = Math.floor(diff/60);
+  if(mins<60) return mins+' minute'+(mins>1?'s':'')+' ago';
+  const hours = Math.floor(mins/60);
+  if(hours<24) return hours+' hour'+(hours>1?'s':'')+' ago';
+  const days = Math.floor(hours/24);
+  return days+' day'+(days>1?'s':'')+' ago';
+}
+
+function getEventIcon(name){
+  name = name.toLowerCase();
+  if(name.includes('weed')) return 'leaf';
+  if(name.includes('pest')||name.includes('bug')) return 'bug';
+  if(name.includes('disease')) return 'virus'; // 'virus' is a bit more specific
+  return 'alert-triangle'; // More "warning" than "circle"
+}
+
+async function fetchEvents(){
+  try{
+    const res = await fetch('https://rbxworks.github.io/data/rewards.json',{cache:'no-store'});
+    const data = await res.json();
+    const events = Object.keys(data).map(k=>({name:k,...data[k]}))
+      .sort((a,b)=>new Date(b.last_updated)-new Date(a.last_updated));
+    
+    events.forEach(event=>{
+      if(!displayedEvents.has(event.name)){
+        displayedEvents.add(event.name);
+        const iconName = getEventIcon(event.name);
+        const card = document.createElement('div');
+        card.className = 'glass-card new flex justify-between items-center';
+        
+        // --- MODIFIED INNER HTML FOR CORPORATE LOOK ---
+        card.innerHTML = `
+          <div class="flex items-center gap-4">
+            <div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-gray-700/50">
+              <i data-lucide="${iconName}" class="w-6 h-6 text-green-400"></i>
+            </div>
+            
+            <div>
+              <div class="font-semibold text-white">${event.name} <span class="badge-new">NEW</span></div>
+              <div class="text-gray-400 text-sm">${event.balance ? 'Sector ' + event.balance : 'Unknown location'}</div>
+            </div>
+          </div>
+          <div class="text-gray-400 text-sm flex-shrink-0 ml-4">${getRelativeTime(event.last_updated)}</div>
+        `;
+        // --- END OF MODIFICATION ---
+        
+        feedContainer.prepend(card);
+        setTimeout(()=>card.classList.add('show'),50);
+        lucide.createIcons();
+      }
+    });
+    lastCheck.textContent = `Last check: ${new Date().toLocaleTimeString()}`;
+  }catch(e){ console.error('Failed to fetch',e);}
+}
+
+// Initial fetch
+fetchEvents();
+setInterval(fetchEvents,5000);
+</script>
+
+</body>
+</html>

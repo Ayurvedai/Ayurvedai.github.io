@@ -3,16 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Lyricist & Melody Matcher</title>
+    <title>AI Lyricist Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --brand-purple: #8B5CF6;
+            --brand-pink: #EC4899;
+            --bg-dark: #111827;
+            --bg-light: #1F2937;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
         body {
             font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 27% 37%, hsla(215, 98%, 61%, 0.1) 0px, transparent 50%),
+                radial-gradient(at 97% 21%, hsla(125, 98%, 72%, 0.1) 0px, transparent 50%),
+                radial-gradient(at 52% 99%, hsla(355, 98%, 61%, 0.1) 0px, transparent 50%),
+                radial-gradient(at 10% 29%, hsla(256, 96%, 67%, 0.1) 0px, transparent 50%),
+                radial-gradient(at 97% 96%, hsla(38, 60%, 74%, 0.1) 0px, transparent 50%),
+                radial-gradient(at 33% 50%, hsla(222, 67%, 73%, 0.1) 0px, transparent 50%),
+                radial-gradient(at 79% 53%, hsla(343, 68%, 79%, 0.1) 0px, transparent 50%);
+        }
+        .glass-card {
+            background: rgba(31, 41, 55, 0.5); /* bg-gray-800/50 */
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border-color);
         }
         .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
+            border: 4px solid #374151; /* gray-700 */
+            border-top: 4px solid var(--brand-purple);
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -22,319 +44,364 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-light); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6B7280; }
     </style>
 </head>
-<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+<body class="text-gray-200 flex items-center justify-center min-h-screen p-4">
 
-    <div class="container mx-auto p-4 md:p-8 max-w-4xl w-full">
-        <div class="bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10">
+<div class="w-full max-w-4xl mx-auto">
+    <div class="glass-card rounded-2xl shadow-2xl overflow-hidden">
+        <div class="p-6 md:p-10">
             <header class="text-center mb-8">
-                <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">AI Lyricist</h1>
-                <p class="text-gray-400 mt-2">Craft lyrics and find the perfect melody match.</p>
+                <div class="flex justify-center items-center gap-4">
+                    <svg class="w-12 h-12 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-.99-3.467l2.31-.66a2.25 2.25 0 001.632-2.163zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 01-.99-3.467l2.31-.66A2.25 2.25 0 009 15.553z" />
+                    </svg>
+                    <h1 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[var(--brand-purple)] to-[var(--brand-pink)]">
+                        AI Lyricist Pro
+                    </h1>
+                </div>
+                 <div class="flex items-center justify-center mt-4">
+                    <p class="text-gray-400">Powered by Gemini 1.5 Flash</p>
+                    <button id="whats-new-btn" class="ml-4 text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded-md hover:bg-purple-500/40 transition-colors">What's New?</button>
+                </div>
             </header>
 
-            <main>
-                <div id="input-form" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div>
-                        <label for="topic" class="block text-sm font-medium text-gray-300 mb-2">Topic / Theme</label>
-                        <input type="text" id="topic" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none" placeholder="e.g., Lost in a futuristic city">
-                    </div>
-                    <div>
-                        <label for="bpm" class="block text-sm font-medium text-gray-300 mb-2">Tempo (BPM)</label>
-                        <select id="bpm" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none">
-                            <option value="70">Slow (70 BPM)</option>
-                            <option value="85">Chill (85 BPM)</option>
-                            <option value="100">Medium (100 BPM)</option>
-                            <option value="120" selected>Upbeat (120 BPM)</option>
-                            <option value="140">Fast (140 BPM)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="genre" class="block text-sm font-medium text-gray-300 mb-2">Genre</label>
-                        <select id="genre" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none">
-                            <option value="pop">Pop</option>
-                            <option value="lo-fi">Lo-fi</option>
-                            <option value="folk">Folk</option>
-                            <option value="synthwave">Synthwave</option>
-                            <option value="ambient">Ambient</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="mood" class="block text-sm font-medium text-gray-300 mb-2">Mood</label>
-                        <select id="mood" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none">
-                            <option value="happy">Happy</option>
-                            <option value="sad">Sad</option>
-                            <option value="dark">Dark</option>
-                            <option value="romantic">Romantic</option>
-                            <option value="energetic">Energetic</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div id="generate-btn-container" class="text-center">
-                    <button id="generate-btn" class="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300">
-                        Generate Lyrics
-                    </button>
-                </div>
-
-                <div id="ad-section" class="hidden text-center my-8">
-                    <p class="text-gray-400 mb-4">Please watch this short message...</p>
-                    <video id="ad-video" class="w-full rounded-lg" controls autoplay muted playsinline>
-                        <source src="add.mp4" type="video/mp4">
-                        Your browser does not support the video tag. (Please add add.mp4)
-                    </video>
-                    <button id="actual-generate-btn" class="hidden mt-4 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300">
-                        Generate Now
-                    </button>
-                    <div id="ad-timer" class="mt-4 text-gray-400">
-                        You can generate in 30 seconds...
-                    </div>
-                </div>
-
-                <div id="loader" class="hidden flex justify-center items-center my-8">
-                    <div class="loader"></div>
-                    <p class="ml-4 text-gray-400">Generating your song...</p>
-                </div>
-                
-                <div id="error-box" class="hidden bg-red-900 border border-red-700 text-red-200 px-4 py-3 rounded-lg relative my-6" role="alert">
-                    <strong class="font-bold">Oops!</strong>
-                    <span class="block sm:inline" id="error-message">Something went wrong. Please try again.</span>
-                </div>
-
-
-                <div id="results" class="hidden mt-10">
-                    <div class="bg-gray-800/50 p-6 rounded-xl">
-                        <h2 class="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">Matched Melody</h2>
-                        <div id="melody-player" class="bg-gray-700 p-4 rounded-lg">
-                             <p id="song-title" class="text-xl font-semibold mb-2"></p>
-                             <p id="song-description" class="text-gray-400 mb-4 text-sm"></p>
-                             <audio id="audio-player" controls class="w-full"></audio>
+            <main id="main-content">
+                <div id="input-form">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="relative">
+                            <label for="topic" class="block text-sm font-medium text-gray-300 mb-2">Topic / Theme</label>
+                            <input type="text" id="topic" class="w-full bg-gray-900/50 border border-gray-700 rounded-lg pl-10 pr-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none" placeholder="e.g., A rainy night in Tokyo">
+                            <svg class="w-5 h-5 absolute left-3 top-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.311a7.5 7.5 0 01-7.5 0c-1.255 0-2.443.29-3.5.832V12a9 9 0 0118 0v4.643c-1.057-.542-2.245-.832-3.5-.832z" /></svg>
+                        </div>
+                         <div class="relative">
+                            <label for="genre" class="block text-sm font-medium text-gray-300 mb-2">Genre</label>
+                            <select id="genre" class="w-full bg-gray-900/50 border border-gray-700 rounded-lg pl-10 pr-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none appearance-none"><option value="pop">Pop</option><option value="lo-fi">Lo-fi</option><option value="folk">Folk</option><option value="synthwave">Synthwave</option><option value="ambient">Ambient</option></select>
+                            <svg class="w-5 h-5 absolute left-3 top-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9l8.25-5.25M9 9v8.25m0-8.25L2.25 3.75M3 12l6.75 4.125M3 12v-1.5m15 1.5v-1.5m-15 1.5l6.75-4.125M15 12l6.75 4.125m-6.75-4.125L21 7.875" /></svg>
+                        </div>
+                        <div class="relative">
+                            <label for="mood" class="block text-sm font-medium text-gray-300 mb-2">Mood</label>
+                            <select id="mood" class="w-full bg-gray-900/50 border border-gray-700 rounded-lg pl-10 pr-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none appearance-none"><option value="happy">Happy</option><option value="sad">Sad</option><option value="dark">Dark</option><option value="romantic">Romantic</option><option value="energetic">Energetic</option></select>
+                            <svg class="w-5 h-5 absolute left-3 top-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9 9.75h.008v.008H9V9.75zm6 0h.008v.008H15V9.75z" /></svg>
+                        </div>
+                        <div class="relative">
+                            <label for="bpm" class="block text-sm font-medium text-gray-300 mb-2">Tempo (BPM)</label>
+                            <select id="bpm" class="w-full bg-gray-900/50 border border-gray-700 rounded-lg pl-10 pr-4 py-2 focus:ring-2 focus:ring-purple-500 focus:outline-none appearance-none"><option value="70">Slow (70)</option><option value="85">Chill (85)</option><option value="100">Medium (100)</option><option value="120" selected>Upbeat (120)</option><option value="140">Fast (140)</option></select>
+                            <svg class="w-5 h-5 absolute left-3 top-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         </div>
                     </div>
+                    <div id="generate-btn-container" class="text-center">
+                        <button id="generate-btn" class="w-full md:w-auto bg-gradient-to-r from-[var(--brand-purple)] to-[var(--brand-pink)] hover:from-purple-500 hover:to-pink-500 text-white font-bold py-3 px-12 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.553L16.5 21.75l-.398-1.197a3.375 3.375 0 00-2.456-2.456L12.75 18l1.197-.398a3.375 3.375 0 002.456-2.456L16.5 14.25l.398 1.197a3.375 3.375 0 002.456 2.456L20.25 18l-1.197.398a3.375 3.375 0 00-2.456 2.456z" /></svg>
+                            Generate Masterpiece
+                        </button>
+                    </div>
+                </div>
 
-                    <div class="bg-gray-800/50 p-6 rounded-xl mt-6">
-                        <h2 class="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">Generated Lyrics</h2>
-                        <div id="lyrics-output" class="text-gray-300 whitespace-pre-wrap bg-gray-700 p-4 rounded-lg h-96 overflow-y-auto"></div>
+                <div id="loader" class="hidden flex flex-col justify-center items-center my-8 gap-4">
+                    <div class="loader"></div>
+                    <p class="text-gray-400">Crafting your song... The AI is warming up its vocal cords!</p>
+                </div>
+
+                <div id="error-box" class="hidden glass-card bg-red-500/20 p-4 rounded-lg my-6" role="alert">
+                     <div class="flex items-center gap-3">
+                        <svg class="w-6 h-6 text-red-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                        <div>
+                            <strong class="font-bold text-red-200">An error occurred!</strong>
+                            <span class="block text-red-300 text-sm" id="error-message">Something went wrong. Please try again.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="results" class="hidden mt-10">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="glass-card p-6 rounded-xl">
+                            <h2 class="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">Matched Melody</h2>
+                            <div id="melody-player" class="bg-gray-900/50 p-4 rounded-lg">
+                                <p id="song-title" class="text-xl font-semibold mb-1"></p>
+                                <p id="song-description" class="text-gray-400 mb-4 text-sm"></p>
+                                <audio id="audio-player" controls class="w-full"></audio>
+                            </div>
+                        </div>
+                        <div class="glass-card p-6 rounded-xl">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">Generated Lyrics</h2>
+                                <button id="copy-btn" class="text-sm bg-gray-700 hover:bg-gray-600 text-gray-300 font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
+                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375V9.375a2.25 2.25 0 00-2.25-2.25H1.5A2.25 2.25 0 00-.75 9.375v10.5A2.25 2.25 0 001.5 22.5h10.5a2.25 2.25 0 002.25-2.25z" /></svg>
+                                    Copy
+                                </button>
+                            </div>
+                            <div id="lyrics-output" class="text-gray-300 whitespace-pre-wrap bg-gray-900/50 p-4 rounded-lg h-96 overflow-y-auto"></div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-8">
+                        <button id="new-song-btn" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-full transition-colors duration-300">
+                            Make Another Song
+                        </button>
                     </div>
                 </div>
             </main>
         </div>
     </div>
+</div>
 
-    <script>
-        const generateBtn = document.getElementById('generate-btn');
-        const generateBtnContainer = document.getElementById('generate-btn-container');
-        const inputForm = document.getElementById('input-form');
-        const loader = document.getElementById('loader');
-        const resultsDiv = document.getElementById('results');
-        const lyricsOutput = document.getElementById('lyrics-output');
-        const audioPlayer = document.getElementById('audio-player');
-        const songTitle = document.getElementById('song-title');
-        const songDescription = document.getElementById('song-description');
-        const errorBox = document.getElementById('error-box');
-        const errorMessage = document.getElementById('error-message');
+<div id="ad-overlay" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-4 z-50">
+    <div class="bg-gray-800 p-8 rounded-2xl shadow-xl w-full max-w-2xl text-center">
+        <p class="text-gray-400 mb-4">Please support this free tool by watching a short message.</p>
+        <video id="ad-video" class="w-full rounded-lg mb-4" controls autoplay muted playsinline>
+            <source src="add.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div id="ad-timer" class="mb-4 text-gray-400">You can generate in 30 seconds...</div>
+        <button id="actual-generate-btn" class="w-full hidden bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300">
+            Generate Now
+        </button>
+    </div>
+</div>
 
-        const adSection = document.getElementById('ad-section');
-        const adVideo = document.getElementById('ad-video');
-        const actualGenerateBtn = document.getElementById('actual-generate-btn');
-        const adTimer = document.getElementById('ad-timer');
-        let adTimerInterval;
+<div id="whats-new-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="glass-card rounded-2xl shadow-2xl w-full max-w-lg p-6 relative">
+        <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+        <h2 class="text-2xl font-bold mb-4 text-center">What's New in AI Lyricist Pro</h2>
+        <ul class="space-y-4 text-gray-300">
+            <li class="flex items-start gap-3">
+                <span class="bg-purple-500/20 text-purple-300 text-xs font-bold px-2 py-1 rounded-md mt-1">NEW</span>
+                <div>
+                    <h3 class="font-semibold">Sleek "Glassmorphism" UI</h3>
+                    <p class="text-sm text-gray-400">Enjoy a completely redesigned interface with modern, professional aesthetics.</p>
+                </div>
+            </li>
+            <li class="flex items-start gap-3">
+                <span class="bg-green-500/20 text-green-300 text-xs font-bold px-2 py-1 rounded-md mt-1">NEW</span>
+                <div>
+                    <h3 class="font-semibold">Copy Lyrics Button</h3>
+                    <p class="text-sm text-gray-400">You can now instantly copy your generated masterpiece to the clipboard.</p>
+                </div>
+            </li>
+             <li class="flex items-start gap-3">
+                <span class="bg-blue-500/20 text-blue-300 text-xs font-bold px-2 py-1 rounded-md mt-1">IMPROVED</span>
+                <div>
+                    <h3 class="font-semibold">AI Model Update</h3>
+                    <p class="text-sm text-gray-400">Upgraded to Google's Gemini 1.5 Flash for faster and more creative lyric generation.</p>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
 
-        const songLibrary = {
-            'song1': { title: 'Midnight Drive', description: '85 BPM - Lo-fi / Chillhop...', url: 'https://placehold.co/music/85-lofi-dark' },
-            'song2': { title: 'Sunrise Pop', description: '120 BPM - Pop / Electronic...', url: 'https://placehold.co/music/120-pop-upbeat' },
-            'song3': { title: 'Acoustic Heart', description: '100 BPM - Folk / Acoustic...', url: 'https://placehold.co/music/100-acoustic-warm' },
-            'song4': { title: 'Rogue Neon', description: '140 BPM - Synthwave / Retro...', url: 'https://placehold.co/music/140-synthwave-dark' },
-            'song5': { title: 'Empty Ballroom', description: '70 BPM - Ambient / Classical...', url: 'https://placehold.co/music/70-ambient-sad' }
-        };
 
-        generateBtn.addEventListener('click', showAd);
+<script type="module">
+    // =========================================================================
+    // ✨ GEMINI AI SDK
+    // =========================================================================
+    import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
-        // ***FIX 1:*** This listener no longer shows the form.
-        // It just hides the ad and starts the API call.
-        actualGenerateBtn.addEventListener('click', () => {
-            adSection.classList.add('hidden');
-            if (adTimerInterval) {
-                clearInterval(adTimerInterval); // Stop timer if user clicks early
-            }
-            performApiCall();
-        });
+    // =========================================================================
+    // 🔑 IMPORTANT: ADD YOUR API KEY HERE
+    // =========================================================================
+    const API_KEY = "AIzaSyDVseil_4n33NFjNhfiOhG7GtxKrSkpVGU";
+    // =========================================================================
 
-        function showAd() {
-            inputForm.classList.add('hidden');
-            generateBtnContainer.classList.add('hidden');
-            resultsDiv.classList.add('hidden');
-            errorBox.classList.add('hidden');
-            loader.classList.add('hidden');
+    const genAI = new GoogleGenerativeAI(API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-            adSection.classList.remove('hidden');
+    // --- DOM ELEMENT REFERENCES ---
+    const mainContent = document.getElementById('main-content');
+    const inputForm = document.getElementById('input-form');
+    const loader = document.getElementById('loader');
+    const resultsDiv = document.getElementById('results');
+    const errorBox = document.getElementById('error-box');
+    const errorMessage = document.getElementById('error-message');
+    
+    const generateBtn = document.getElementById('generate-btn');
+    const newSongBtn = document.getElementById('new-song-btn');
+    const copyBtn = document.getElementById('copy-btn');
 
-            adVideo.currentTime = 0;
-            adVideo.play().catch(error => {
-                console.warn("Autoplay was prevented:", error);
-            });
+    const lyricsOutput = document.getElementById('lyrics-output');
+    const audioPlayer = document.getElementById('audio-player');
+    const songTitle = document.getElementById('song-title');
+    const songDescription = document.getElementById('song-description');
 
-            let countdown = 30;
-            adTimer.innerText = `You can generate in ${countdown} seconds...`;
-            actualGenerateBtn.classList.add('hidden');
-            adTimer.classList.remove('hidden');     
-            
-            if (adTimerInterval) {
+    // Ad Elements
+    const adOverlay = document.getElementById('ad-overlay');
+    const adVideo = document.getElementById('ad-video');
+    const actualGenerateBtn = document.getElementById('actual-generate-btn');
+    const adTimer = document.getElementById('ad-timer');
+    let adTimerInterval;
+
+    // Modal Elements
+    const whatsNewModal = document.getElementById('whats-new-modal');
+    const whatsNewBtn = document.getElementById('whats-new-btn');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+
+    // --- SONG LIBRARY ---
+    const songLibrary = {
+        'song1': { title: 'Midnight Drive', description: '85 BPM - Lo-fi / Chillhop', url: 'https://storage.googleapis.com/codeshul-is-awesome/85-lofi-dark.mp3' },
+        'song2': { title: 'Sunrise Pop', description: '120 BPM - Pop / Electronic', url: 'https://storage.googleapis.com/codeshul-is-awesome/120-pop-upbeat.mp3' },
+        'song3': { title: 'Acoustic Heart', description: '100 BPM - Folk / Acoustic', url: 'https://storage.googleapis.com/codeshul-is-awesome/100-acoustic-warm.mp3' },
+        'song4': { title: 'Rogue Neon', description: '140 BPM - Synthwave / Retro', url: 'https://storage.googleapis.com/codeshul-is-awesome/140-synthwave-dark.mp3' },
+        'song5': { title: 'Empty Ballroom', description: '70 BPM - Ambient / Classical', url: 'https://storage.googleapis.com/codeshul-is-awesome/70-ambient-sad.mp3' }
+    };
+
+    // --- EVENT LISTENERS ---
+    generateBtn.addEventListener('click', showAd);
+    actualGenerateBtn.addEventListener('click', () => {
+        adOverlay.classList.add('hidden');
+        if (adTimerInterval) clearInterval(adTimerInterval);
+        performApiCall();
+    });
+    newSongBtn.addEventListener('click', resetUI);
+    copyBtn.addEventListener('click', copyLyricsToClipboard);
+    whatsNewBtn.addEventListener('click', () => whatsNewModal.classList.remove('hidden'));
+    closeModalBtn.addEventListener('click', () => whatsNewModal.classList.add('hidden'));
+
+    // --- CORE FUNCTIONS ---
+
+    function resetUI() {
+        resultsDiv.classList.add('hidden');
+        errorBox.classList.add('hidden');
+        inputForm.classList.remove('hidden');
+        
+        lyricsOutput.textContent = '';
+        audioPlayer.src = '';
+        songTitle.textContent = '';
+        songDescription.textContent = '';
+        document.getElementById('topic').value = '';
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showAd() {
+        adOverlay.classList.remove('hidden');
+        adVideo.currentTime = 0;
+        adVideo.play().catch(e => console.warn("Autoplay was prevented:", e));
+
+        let countdown = 30;
+        adTimer.textContent = `You can generate in ${countdown} seconds...`;
+        actualGenerateBtn.classList.add('hidden');
+        adTimer.classList.remove('hidden');
+
+        if (adTimerInterval) clearInterval(adTimerInterval);
+
+        adTimerInterval = setInterval(() => {
+            countdown--;
+            if (countdown > 0) {
+                adTimer.textContent = `You can generate in ${countdown} seconds...`;
+            } else {
                 clearInterval(adTimerInterval);
+                adTimer.classList.add('hidden');
+                actualGenerateBtn.classList.remove('hidden');
             }
+        }, 1000);
+    }
 
-            adTimerInterval = setInterval(() => {
-                countdown--;
-                if (countdown > 0) {
-                    adTimer.innerText = `You can generate in ${countdown} seconds...`;
-                } else {
-                    clearInterval(adTimerInterval);
-                    adTimer.classList.add('hidden');
-                    actualGenerateBtn.classList.remove('hidden');
-                }
-            }, 1000);
+    async function performApiCall() {
+        if (API_KEY === "YOUR_API_KEY_HERE") {
+            showError("Please add your Gemini API Key to the script section.");
+            return;
         }
 
-        async function performApiCall() {
-            const topic = document.getElementById('topic').value || 'a random topic';
-            const bpm = document.getElementById('bpm').value;
-            const genre = document.getElementById('genre').value;
-            const mood = document.getElementById('mood').value;
+        const topic = document.getElementById('topic').value || 'a random topic';
+        const bpm = document.getElementById('bpm').value;
+        const genre = document.getElementById('genre').value;
+        const mood = document.getElementById('mood').value;
 
-            // Form is already hidden, so just show loader
-            loader.classList.remove('hidden');
-            resultsDiv.classList.add('hidden');
-            errorBox.classList.add('hidden');
-            generateBtn.disabled = true;
-            generateBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        inputForm.classList.add('hidden');
+        loader.classList.remove('hidden');
+        resultsDiv.classList.add('hidden');
+        errorBox.classList.add('hidden');
+        
+        try {
+            const prompt = `You are a professional songwriter. Your task is to write lyrics for a new song and then choose the best-fitting backing track from a provided list.
 
-            const prompt = `
-                You are an expert songwriter...
-                Topic: ${topic}, Tempo: ${bpm}, Genre: ${genre}, Mood: ${mood}
-                ...
-                **Song Library for Selection:**
-                - id: "song1", description: "85 BPM, Lo-fi/Chillhop, Dark, introspective, calm, melancholic"
-                - id: "song2", description: "120 BPM, Pop/Electronic, Upbeat, happy, energetic, hopeful"
-                - id: "song3", description: "100 BPM, Folk/Acoustic, Sentimental, warm, romantic, gentle"
-                - id: "song4", description: "140 BPM, Synthwave/Retro, Dark, driving, tense, futuristic"
-                - id: "song5", description: "70 BPM, Ambient/Classical, Sad, ethereal, spacious, emotional"
-                ...
-            `;
+Here are the song's details:
+- Topic: "${topic}"
+- Genre: ${genre}
+- Mood: ${mood}
+- Tempo: ${bpm} BPM
 
-            try {
-                const result = await callGemini(prompt);
-                
-                if (result && result.lyrics && result.songId) {
-                    displayResults(result.lyrics, result.songId);
-                } else {
-                    throw new Error('Invalid response structure from API.');
-                }
+First, write the song lyrics. The lyrics should be creative, follow a standard song structure (e.g., Verse, Chorus, Bridge), and perfectly match the specified topic, genre, and mood.
 
-            } catch (error) {
-                console.error("Error calling Gemini API:", error);
-                showError('Failed to generate content. The model may be unavailable. Please try again later.');
-            } finally {
-                // ***FIX 2:*** This 'finally' block now correctly
-                // resets the UI by re-showing the form and button.
-                loader.classList.add('hidden');
-                
-                // Show the form again so the user can make a new song
-                inputForm.classList.remove('hidden');
-                generateBtnContainer.classList.remove('hidden');
-                
-                generateBtn.disabled = false;
-                generateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+After writing the lyrics, you MUST choose the most suitable song ID from this list based on the song's vibe:
+- song1: Midnight Drive (85 BPM, Lo-fi, Dark/Chill)
+- song2: Sunrise Pop (120 BPM, Pop, Upbeat/Happy)
+- song3: Acoustic Heart (100 BPM, Folk, Romantic/Warm)
+- song4: Rogue Neon (140 BPM, Synthwave, Energetic/Dark)
+- song5: Empty Ballroom (70 BPM, Ambient, Sad/Reflective)
+
+Format your final response ONLY as follows, with no extra text or explanations:
+[Your generated lyrics here]|||SONG_ID|||[The chosen song ID here]`;
+
+            const result = await model.generateContent(prompt);
+            const response = result.response;
+            const text = response.text();
+
+            const parts = text.split('|||SONG_ID|||');
+            if (parts.length !== 2) {
+                throw new Error("AI response was not in the expected format. The model might be busy. Please try again.");
             }
-        }
-
-        function displayResults(lyrics, songId) {
-            lyricsOutput.innerText = lyrics;
             
-            const selectedSong = songLibrary[songId];
-            if (selectedSong) {
-                songTitle.innerText = selectedSong.title;
-                songDescription.innerText = selectedSong.description;
-                audioPlayer.src = selectedSong.url;
-                resultsDiv.classList.remove('hidden');
-            } else {
-                showError(`The AI recommended a song ID ("${songId}") that doesn't exist in our library.`);
-            }
+            const lyrics = parts[0].trim();
+            const songId = parts[1].trim();
+
+            displayResults(lyrics, songId);
+
+        } catch (error) {
+            console.error("Gemini API Error:", error);
+            showError(`Failed to generate content. ${error.message}`);
+        } finally {
+            loader.classList.add('hidden');
         }
+    }
 
-        function showError(message) {
-            errorMessage.innerText = message;
-            errorBox.classList.remove('hidden');
+    function displayResults(lyrics, songId) {
+        lyricsOutput.textContent = lyrics;
+        const selectedSong = songLibrary[songId];
+
+        if (selectedSong) {
+            songTitle.textContent = selectedSong.title;
+            songDescription.textContent = selectedSong.description;
+            audioPlayer.src = selectedSong.url;
+            resultsDiv.classList.remove('hidden');
+            // Scroll to results on mobile
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            showError(`The AI recommended a song ID ("${songId}") that doesn't exist. Using a default song.`);
+            displayResults(lyrics, 'song2'); // Fallback to a default
         }
+    }
 
-        async function callGemini(prompt) {
-            // --->>> ***IMPORTANT*** <<<---
-            // You MUST put your API key here for it to work.
-            const apiKey = "AIzaSyDVseil_4n33NFjNhfiOhG7GtxKrSkpVGU"; // <<<--- ADD YOUR KEY HERE
-            // -----------------------------
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorBox.classList.remove('hidden');
+        inputForm.classList.remove('hidden');
+        loader.classList.add('hidden');
+    }
 
-            if (apiKey === "YOUR_API_KEY_HERE" || apiKey === "") {
-                 throw new Error("API key is missing. Please add your API key to the callGemini function.");
-            }
-
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-            const payload = {	
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            "lyrics": { "type": "STRING" },
-                            "songId": { "type": "STRING" }
-                        },
-                        required: ["lyrics", "songId"]
-                    }
-                }
-            };
-            
-            let response;
-            try {
-                response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    const errorBody = await response.json();
-                    console.error("API Error Response:", errorBody);
-                    // Provide a more specific error if possible
-                    let errorMsg = errorBody?.error?.message || `API request failed with status ${response.status}`;
-                    if (errorMsg.includes("API key not valid")) {
-                        errorMsg = "The API Key is not valid. Please check your key.";
-                    } else if (errorMsg.includes("permission")) {
-                         errorMsg = "API Key Permission Error. You may need to enable 'HTTP referrers' in your Google Cloud console.";
-                    }
-                    throw new Error(errorMsg);
-                }
-            } catch (networkError) {
-                 console.error("Network Error:", networkError);
-                 // Check if it's a CORS error, which is common
-                 if (networkError.message.includes("Failed to fetch")) {
-                    throw new Error("A network error occurred. This is often a CORS policy issue. Make sure your API key is configured to allow requests from this domain.");
-                 }
-                 throw new Error("A network error occurred. Please check your connection.");
-            }
-
-            const result = await response.json();
-            
-            if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0]) {
-                const jsonText = result.candidates[0].content.parts[0].text;
-                return JSON.parse(jsonText);
-            } else {
-                console.error("Unexpected API response structure:", result);
-                if (result.candidates && result.candidates[0].finishReason === 'SAFETY') {
-                    throw new Error("Generation failed due to safety settings. Try a different prompt.");
-                }
-                throw new Error("Could not parse the response from the API.");
-            }
+    function copyLyricsToClipboard() {
+        const lyrics = lyricsOutput.textContent;
+        if (lyrics) {
+            navigator.clipboard.writeText(lyrics).then(() => {
+                copyBtn.innerHTML = `
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                Copied!`;
+                setTimeout(() => {
+                    copyBtn.innerHTML = `
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375V9.375a2.25 2.25 0 00-2.25-2.25H1.5A2.25 2.25 0 00-.75 9.375v10.5A2.25 2.25 0 001.5 22.5h10.5a2.25 2.25 0 002.25-2.25z" /></svg>
+                    Copy`;
+                }, 2000);
+            }, (err) => {
+                console.error('Failed to copy: ', err);
+            });
         }
-    </script>
+    }
+</script>
 </body>
 </html>

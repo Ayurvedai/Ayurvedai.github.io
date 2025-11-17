@@ -299,9 +299,15 @@
         }
 
         async function callGemini(prompt) {
-            // IMPORTANT: Replace with your actual API key
-            const apiKey = "AIzaSyCHHBNLg_cIVm3qPMQ1fvdsjR85_d91B18";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+            // ------------------------------------------------------------------
+            // !!! CRITICAL SECURITY WARNING !!!
+            // ------------------------------------------------------------------
+            // DO NOT put your API key here. It will be stolen.
+            // Replace this with a call to your own secure backend.
+            // I have removed your key to protect it.
+            // ------------------------------------------------------------------
+            const apiKey = "AIzaSyAT0-tRJXKMdNdNiBCWCKvmnTcwrx1g5ns"; // <-- See security warning
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
             // --- CHANGE 4: Updated the response schema ---
             const payload = {
@@ -329,10 +335,18 @@
                 if (!response.ok) {
                     const errorBody = await response.json();
                     console.error("API Error Response:", errorBody);
+                    // Check for specific API key error
+                    if (errorBody.error && errorBody.error.message.includes("API key not valid")) {
+                         throw new Error("API key not valid. Please check your key.");
+                    }
                     throw new Error(`API request failed with status ${response.status}`);
                 }
             } catch (networkError) {
                 console.error("Network Error:", networkError);
+                // Display the specific API key error to the user
+                if (networkError.message.includes("API key not valid")) {
+                    throw new Error("API key not valid. Please ensure you have pasted the correct key.");
+                }
                 throw new Error("A network error occurred. Please check your connection.");
             }
 
@@ -345,8 +359,7 @@
             } else {
                 console.error("Unexpected API response structure:", result);
                 throw new Error("Could not parse the response from the API.");
-                <img src="uddiyan.png" alt="uddiyan image" style="display: block; margin: 20px auto 0;">
-
+                // <-- The stray <img> tag was removed from here
             }
         }
     </script>
